@@ -2,9 +2,9 @@ const {proxy} = require('most-proxy')
 const {makeState, initialState} = require('./state')
 const makeCsgViewer = require('../../csg-viewer/src/index')
 
-const element = document.getElementById('renderTarget')
-const {csgViewer, viewerDefaults, viewerState$} = makeCsgViewer(element, initialState.viewer)
+let csgViewer
 
+// all the side effects : ie , input/outputs
 const {electronStoreSink, electronStoreSource} = require('./sideEffects/electronStore')
 const {titleBarSink} = require('./sideEffects/titleBar')
 const makeDragDropSource = require('./sideEffects/dragDrop')
@@ -12,6 +12,7 @@ const storeSource$ = electronStoreSource()
 const dragAndDropSource$ = makeDragDropSource(document)
 const {watcherSink, watcherSource} = require('./sideEffects/fileWatcher')
 const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
+const {domSink, domSource} = require('./sideEffects/dom')
 const paramsCallbacktoStream = require('./observable-utils/callbackToObservable')()
 
 // proxy state stream to be able to access & manipulate it before it is actually available
@@ -31,24 +32,6 @@ attach(makeState(Object.values(actions$)))
 state$.forEach(function (state) {
   // console.log('state', state)
 })
-
-// for viewer
-state$
-  .map(state => state.viewer)
-  .skipRepeatsWith(function (a, b) {
-    return JSON.parse(JSON.stringify(a)) === JSON.parse(JSON.stringify(b))
-  })
-/* require('most').mergeArray(
-  [
-    actions$.toggleGrid$.map(x => ({grid: {show: x.data}})),
-    // actions$.toggleAutorotate$,
-    // actions$.changeTheme$.map(x=>x)
-  ]
-) */
-  .forEach(params => {
-    console.log('change viewer params', params)
-    csgViewer(params)
-  })
 
 // titlebar & store side effects
 titleBarSink(
@@ -95,101 +78,136 @@ state$
   }) */
   .forEach(state => {
     console.log('changing solids')
-    csgViewer(undefined, {solids: state.design.solids})
+    if (csgViewer !== undefined) {
+      csgViewer(undefined, {solids: state.design.solids})
+    }
   })
 
 // ui updates, exports
-state$
-  .skipRepeatsWith(function (a, b) {
-    return a.exportFormat === b.exportFormat && a.availableExportFormats === b.availableExportFormats
-  })
-  .forEach(state => {
-    const html = require('bel')
+const morph = require('morphdom')// require('nanomorph')
+const html = require('bel')
+let tree
 
-    const formatsListUI = state.availableExportFormats
-      .map(function ({name, displayName}) {
-        return html`<option value=${name}>${displayName}</option>`
-      })
-    console.log('sdfsdff')
+function dom (state) {
+  const formatsList = state.availableExportFormats
+    .map(function ({name, displayName}) {
+      return html`<option value=${name}>${displayName}</option>`
+    })
 
-    document.getElementById('exportBtn').value = `export to ${state.exportFormat}`
-    const formatsListEl = document.getElementById('exportFormats')
-    if (formatsListEl) {
-      while (formatsListEl.firstChild) {
-        formatsListEl.removeChild(formatsListEl.firstChild)
-      }
-    }
-    if (formatsListUI.length > 0) {
-      formatsListUI.forEach(function (gna) {
-        formatsListEl.appendChild(gna)
-        gna.selected = state.exportFormat === gna.value
-      })
-    }
-    /* let formatsUI = html`<span>
-      <select id='exportFormats'>
-        ${formatsListUI}
-      </select>
-      <input type='button' value="export to ${state.exportFormat}" id="exportBtn"/>
-    </span>`
-
-    const exportsNode = document.getElementById('exports')
-    if (exportsNode) {
-      while (exportsNode.firstChild) {
-        exportsNode.removeChild(exportsNode.firstChild)
-      }
-    }
-    exportsNode.appendChild(formatsUI) */
-  })
-
-// ui updates, busy
-state$
-  .map(state => state.busy)
-  .skipRepeats()
-  .forEach(function (busy) {
-    const ui = document.getElementById('busy')
-    ui.innerText = busy ? 'processing, please wait' : ''
-  })
-
-// ui updates, params
-state$
-// .filter(state => state.design.paramDefinitions.length > 0)
-.skipRepeatsWith(function (a, b) {
-  return JSON.stringify(a.design.paramDefinitions) === JSON.stringify(b.design.paramDefinitions)
-})
-.forEach(state => {
-  const {paramDefinitions, paramValues} = state.design
-  const html = require('bel')
-
+  console.log('state', state)
   const {createParamControls} = require('./ui/paramControls2')
-  console.log('instantUpdate', state.instantUpdate)
-  const {controls} = createParamControls(paramValues, paramDefinitions, state.instantUpdate, paramsCallbacktoStream.callback) /* paramDefinitions.map(function (paramDefinition, index) {
-    console.log('paramDefinition', paramDefinition)
-    paramDefinition.index = index + 1
-    return createControl(paramDefinition)
-  }) */
+  const {paramValues, paramDefinitions} = state.design
+  const {controls} = createParamControls(paramValues, paramDefinitions, state.instantUpdate, paramsCallbacktoStream.callback)
 
-  const paramsUI = html`
-  <span>
-    <table>
-      ${controls}
-    </table>
-    <span>
-      <input type='checkbox' checked=${state.instantUpdate} id='instantUpdate'> </input>
-      <button id='updateDesignFromParams'>Update</button>
-    </span>
-  </span>`
+  const output = html`
+    <div id='container'>
+      <!--Ui Controls-->
+      <div id='controls'>
+        <input type="button" value="load jscad (.js or .jscad) file" id="fileLoader"/>
+        <label for="autoReload">Auto reload</label>
+          <input type="checkbox" id="autoReload"/>
+        <label for="grid">Grid</label>
+          <input type="checkbox" id="grid"/>
+        <label for="autoRotate">Autorotate</label>
+          <input type="checkbox" id="autoRotate"/>
+        
+        <select id='themeSwitcher'>
+          <option value='dark'>Dark Theme</option>
+          <option value='light'>Light Theme</option>
+        </select>
+        
+        <span id='exports'>
+          <select id='exportFormats'>
+          ${formatsList}
+          </select>
+          <input type='button' value="export to ${state.exportFormat}" id="exportBtn"/>
+        </span>
 
-  const fooUi = html` <table>
-  ${controls}
-    </table>`
+        <span id='busy'>${state.busy ? 'processing, please wait' : ''}</span>
+      </div>
+      <!--Params-->
+      <span id='params'>
+        <span id='paramsMain'>
+          <table>
+            ${controls}
+          </table>
+        </span>
+        <span id='paramsControls'>
+          <button id='updateDesignFromParams'>Update</button>
+          <label for='instantUpdate'>Instant Update</label>
+          <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
+        </span>
+      </span>
 
-  const node = document.getElementById('paramsMain')
-  if (node) {
-    while (node.firstChild) {
-      node.removeChild(node.firstChild)
-    }
-  }
-  // yet another hack/shorthand
-  document.getElementById('params').style.visibility = controls.length === 0 ? 'hidden' : ''
-  node.appendChild(fooUi)
+      <canvas id='renderTarget'> </canvas>
+      
+    </div>
+  `
+  return output
+  // width=1000 height= 1000
+}
+state$.take(1).forEach(function (state) {
+  tree = dom(state)
+  document.body.appendChild(tree)
 })
+state$
+  .skip(1)
+  .skipRepeatsWith(function (state, previousState) {
+    const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
+    const sameExportFormats = state.exportFormat === previousState.exportFormat &&
+     state.availableExportFormats === previousState.availableExportFormats
+    const sameStatus = state.busy === previousState.busy
+    return sameParamDefinitions && sameExportFormats && sameStatus
+  })
+  .forEach(function (state) {
+    morph(tree, dom(state))
+  })
+
+// for viewer
+state$
+  .map(state => state.viewer)
+  .skipRepeatsWith(function (a, b) {
+    return JSON.parse(JSON.stringify(a)) === JSON.parse(JSON.stringify(b))
+  })
+  /* require('most').mergeArray(
+  [
+    actions$.toggleGrid$.map(x => ({grid: {show: x.data}})),
+    // actions$.toggleAutorotate$,
+    // actions$.changeTheme$.map(x=>x)
+  ]
+  ) */
+  .forEach(params => {
+    const viewerElement = document.getElementById('renderTarget')
+    setCanvasSize(viewerElement)
+    if (viewerElement && !csgViewer) {
+      const csgViewerItems = makeCsgViewer(viewerElement, params)
+      csgViewer = csgViewerItems.csgViewer
+    }
+    if (csgViewer) {
+      csgViewer(params)
+    }
+  })
+
+function setCanvasSize (viewerElement) {
+  let pixelRatio = window.pixelRatio || 1
+  pixelRatio = 2 // upscaling
+  let w = window.innerWidth
+  let h = window.innerHeight
+  if (viewerElement !== document.body) {
+    const bounds = viewerElement.getBoundingClientRect()
+    w = bounds.right - bounds.left
+    h = bounds.bottom - bounds.top
+    console.log('foo', w, h)
+  }
+  w = pixelRatio * w
+  h = pixelRatio * h
+  viewerElement.width = w
+  viewerElement.height = h
+  viewerElement.clientWidth = w
+  viewerElement.clientHeight = h
+  //viewerElement.style.width = w + 'px'
+  //viewerElement.style.height = h + 'px'
+}
+window.onresize = function(){
+  setCanvasSize(document.getElementById('renderTarget'))
+}

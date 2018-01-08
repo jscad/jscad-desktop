@@ -1,3 +1,5 @@
+const most = require('most')
+
 function domSource () {
   let storedListeners = []
   const select = function (query) {
@@ -16,12 +18,20 @@ function domSource () {
   return select
 }
 
-function domSink () {
-
+function domSink (outToDom$) {
+  let tree
+  const firstRender$ = outToDom$
+    .take(1).forEach(function (state) {
+      tree = dom(state)
+      document.getElementById('container').appendChild(tree)
+    })
+  return most.mergeArray([
+    tree
+  ])
 }
 
 function makeDomSource () {
 
 }
 
-module.exports = {makeDomSource}
+module.exports = {makeDomSource, domSink}

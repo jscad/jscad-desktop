@@ -8,20 +8,17 @@ const makeActions = (sources) => {
   sources.watcher.forEach(function (data) {
     console.log('watchedFile', data)
   })
-
   sources.drops.forEach(function (data) {
     console.log('drop', data)
   })
-
   sources.fs.forEach(function (data) {
     console.log('fs operations', data)
   })
-
   sources.paramChanges.forEach(function (data) {
     console.log('param changes', data)
   })
 
-  const toggleGrid$ = most.mergeArray([
+  /*const toggleGrid$ = most.mergeArray([
     most.fromEvent('click', document.getElementById('grid')).map(e => e.target.checked),
     sources.store.map(data => data.viewer.grid.show)
   ])
@@ -52,10 +49,6 @@ const makeActions = (sources) => {
     }, sources.state$)
     .map(function ({defaultExportFilePath, exportFormat, data}) {
       console.log('exporting data to', defaultExportFilePath)
-      /* const extension = formats[format].extension
-      const defaultExportFileName = `${designName}.${extension}`
-      const defaultExportFilePath = path.join(designPath, defaultFileName)
-      const defaultPath = defaultExportFilePath */
       const filePath = dialog.showSaveDialog({properties: ['saveFile'], title: 'export design to', defaultPath: defaultExportFilePath})//, function (filePath) {
       console.log('saving', filePath)
       if (filePath !== undefined) {
@@ -73,14 +66,14 @@ const makeActions = (sources) => {
 
   // non visual related actions
   const toggleInstantUpdate$ = most.fromEvent('click', document.getElementById('instantUpdate'))
-    .map(event => ({type: 'toggleInstantUpdate', data: event.target.checked}))
+    .map(event => ({type: 'toggleInstantUpdate', data: event.target.checked}))*/
 
   const designPath$ = most.mergeArray([
-    most.fromEvent('click', document.getElementById('fileLoader'))
+    /*most.fromEvent('click', document.getElementById('fileLoader'))
       .map(function () {
         const paths = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
         return paths
-      }),
+      }),*/
     sources.store
       .map(data => data.design.mainPath)
       .filter(data => data !== '')
@@ -107,12 +100,12 @@ const makeActions = (sources) => {
     .map(data => ({type: 'setDesignScriptContent', data}))
 
   const updateDesignFromParams$ = most.mergeArray([
-    most.fromEvent('click', document.getElementById('updateDesignFromParams'))
+    /*most.fromEvent('click', document.getElementById('updateDesignFromParams'))
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
         const paramValues = require('./core/getParamValues')(controls)
         return paramValues
-      }),
+      }),*/
     sources.paramChanges.map(function (controls) {
       const paramValues = require('./core/getParamValues')(controls)
       console.log('paramValues', paramValues)
@@ -122,13 +115,13 @@ const makeActions = (sources) => {
     .map(data => ({type: 'updateDesignFromParams', data}))
 
   return {
-    toggleGrid$,
+    /*toggleGrid$,
     toggleAutorotate$,
     toggleAutoReload$,
     toggleInstantUpdate$,
     changeExportFormat$,
     exportRequested$,
-    changeTheme$,
+    changeTheme$,*/
     setDesignPath$,
     designLoadRequested$,
     updateDesignFromParams$
