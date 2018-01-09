@@ -1,4 +1,5 @@
 const most = require('most')
+const morph = require('morphdom')// require('nanomorph')
 
 function domSource () {
   let storedListeners = []
@@ -21,13 +22,21 @@ function domSource () {
 function domSink (outToDom$) {
   let tree
   const firstRender$ = outToDom$
-    .take(1).forEach(function (state) {
-      tree = dom(state)
-      document.getElementById('container').appendChild(tree)
+    .take(1)
+    .map(function (_tree) {
+      tree = _tree
+      document.body.appendChild(tree)
     })
+  const otherRenders$ = outToDom$
+    .skip(1)
+    .map(function (newTree) {
+      morph(tree, newTree)
+    })
+
   return most.mergeArray([
-    tree
-  ])
+    firstRender$,
+    otherRenders$
+  ]).forEach(x => x)
 }
 
 function makeDomSource () {

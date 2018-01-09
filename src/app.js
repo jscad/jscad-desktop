@@ -146,7 +146,7 @@ function dom (state) {
   return output
   // width=1000 height= 1000
 }
-state$.take(1).forEach(function (state) {
+/* state$.take(1).forEach(function (state) {
   tree = dom(state)
   document.body.appendChild(tree)
 })
@@ -161,7 +161,19 @@ state$
   })
   .forEach(function (state) {
     morph(tree, dom(state))
+  }) */
+
+const outToDom$ = state$
+  .skipRepeatsWith(function (state, previousState) {
+    const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
+    const sameExportFormats = state.exportFormat === previousState.exportFormat &&
+    state.availableExportFormats === previousState.availableExportFormats
+    const sameStatus = state.busy === previousState.busy
+    return sameParamDefinitions && sameExportFormats && sameStatus
   })
+  .map(state => dom(state))
+
+domSink(outToDom$)
 
 // for viewer
 state$
@@ -189,25 +201,24 @@ state$
   })
 
 function setCanvasSize (viewerElement) {
-  let pixelRatio = window.pixelRatio || 1
-  pixelRatio = 2 // upscaling
-  let w = window.innerWidth
-  let h = window.innerHeight
+  let pixelRatio = window.devicePixelRatio || 1
+  let width = window.innerWidth
+  let height = window.innerHeight
   if (viewerElement !== document.body) {
     const bounds = viewerElement.getBoundingClientRect()
-    w = bounds.right - bounds.left
-    h = bounds.bottom - bounds.top
-    console.log('foo', w, h)
+    width = bounds.right - bounds.left
+    height = bounds.bottom - bounds.top
+    // console.log('foo', width, height)
   }
-  w = pixelRatio * w
-  h = pixelRatio * h
-  viewerElement.width = w
-  viewerElement.height = h
-  viewerElement.clientWidth = w
-  viewerElement.clientHeight = h
-  //viewerElement.style.width = w + 'px'
-  //viewerElement.style.height = h + 'px'
+  width *= pixelRatio
+  height *= pixelRatio
+  viewerElement.width = width
+  viewerElement.height = height
+  viewerElement.clientWidth = width
+  viewerElement.clientHeight = height
+  // viewerElement.style.width = width + 'px'
+  // viewerElement.style.height = height + 'px'
 }
-window.onresize = function(){
+window.onresize = function () {
   setCanvasSize(document.getElementById('renderTarget'))
 }
