@@ -32,6 +32,7 @@ const initialState = {
   busy: false,
   // visuals
   themeName: 'light',
+  mainTextColor: '#FFF',
   viewer: {// ridiculous shadowing of viewer state ?? or actually logical
     rendering: {
       background: [0.211, 0.2, 0.207, 1], // [1, 1, 1, 1],//54, 51, 53
@@ -68,18 +69,16 @@ function makeState (actions) {
       const viewer = Object.assign({}, state.viewer, {grid})
       return Object.assign({}, state, {viewer})
     },
+    toggleAxes: (state, show) => {
+      const axes = Object.assign({}, state.viewer.axes, {show})
+      const viewer = Object.assign({}, state.viewer, {axes})
+      return Object.assign({}, state, {viewer})
+    },
     changeTheme: (state, themeName) => {
-      console.log('changeTheme')
-      const viewer = merge({}, state.viewer, themes[themeName])
-      // TODO: move some of this to side effects
-      // console.log('params in app', themedViewerOptions.background)
-      // const background = themedViewerOptions.grid.color//.map(x => x * 255)
-      // const bgColorRgba = `rgba(${[...background.map(x => x * 255)].join(', ')})`
-      // console.log(bgColorRgba)
-      const bgColorRgba = themeName === 'light' ? 'black' : 'white'
-      document.getElementById('controls').style.color = bgColorRgba
-      document.getElementById('params').style.color = bgColorRgba
-      return Object.assign({}, state, {viewer, themeName})
+      const themeData = themes[themeName]
+      console.log('changeTheme', themeName, themeData)
+      const viewer = merge({}, state.viewer, themeData.viewer)
+      return Object.assign({}, state, {viewer, themeName, mainTextColor: themeData.mainTextColor})
     },
     toggleAutoReload: (state, autoReload) => {
       return Object.assign({}, state, {autoReload})
@@ -147,8 +146,12 @@ function makeState (actions) {
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: [''], zoomToFitOn: ['new-entities']}})
       return Object.assign({}, state, {design, viewer}, {availableExportFormats, exportFormat, busy: false})
     },
-    updateDesignFromParams: (state, paramValues) => {
+    updateDesignFromParams: (state, {paramValues, origin}) => {
       console.log('updateDesignFromParams')
+      // disregard live updates if not enabled
+      if (state.instantUpdate === false && origin === 'instantUpdate') {
+        return state
+      }
       let originalDesign = state.design
       const {script} = originalDesign
 

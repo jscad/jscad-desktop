@@ -25,13 +25,11 @@ const actions$ = require('./actions')({
   watcher: watcherSource(),
   fs: fsSource(),
   paramChanges: paramsCallbacktoStream.stream,
-  state$
+  state$,
+  dom: domSource()
 })
 
 attach(makeState(Object.values(actions$)))
-state$.forEach(function (state) {
-  // console.log('state', state)
-})
 
 // titlebar & store side effects
 titleBarSink(
@@ -51,7 +49,8 @@ electronStoreSink(state$
         axes: {show: state.viewer.axes.show},
         grid: {show: state.viewer.grid.show}
       },
-      autoReload: state.autoReload
+      autoReload: state.autoReload,
+      instantUpdate: state.instantUpdate
     }
   })
 )
@@ -84,36 +83,36 @@ state$
   })
 
 // ui updates, exports
-const morph = require('morphdom')// require('nanomorph')
 const html = require('bel')
-let tree
 
 function dom (state) {
   const formatsList = state.availableExportFormats
     .map(function ({name, displayName}) {
-      return html`<option value=${name}>${displayName}</option>`
+      return html`<option value=${name} selected='${state.exportFormat === name}'>${displayName}</option>`
     })
 
-  console.log('state', state)
-  const {createParamControls} = require('./ui/paramControls2')
+  console.log('state', state.instantUpdate)
+  const {createParamControls} = require('./ui/createParameterControls2')
   const {paramValues, paramDefinitions} = state.design
-  const {controls} = createParamControls(paramValues, paramDefinitions, state.instantUpdate, paramsCallbacktoStream.callback)
+  const {controls} = createParamControls(paramValues, paramDefinitions, true, paramsCallbacktoStream.callback)
 
   const output = html`
-    <div id='container'>
+    <div id='container' style='color:${state.mainTextColor}'>
       <!--Ui Controls-->
       <div id='controls'>
         <input type="button" value="load jscad (.js or .jscad) file" id="fileLoader"/>
         <label for="autoReload">Auto reload</label>
-          <input type="checkbox" id="autoReload"/>
+          <input type="checkbox" id="autoReload" checked=${state.autoReload}/>
         <label for="grid">Grid</label>
-          <input type="checkbox" id="grid"/>
+          <input type="checkbox" id="grid" checked=${state.viewer.grid.show}/>
+        <label for="toggleAxes">Axes</label>
+          <input type="checkbox" id="toggleAxes" checked=${state.viewer.axes.show}/>
         <label for="autoRotate">Autorotate</label>
           <input type="checkbox" id="autoRotate"/>
         
         <select id='themeSwitcher'>
-          <option value='dark'>Dark Theme</option>
-          <option value='light'>Light Theme</option>
+          <option value='dark' selected=${state.themeName === 'dark'}>Dark Theme</option>
+          <option value='light' selected=${state.themeName === 'light'}>Light Theme</option>
         </select>
         
         <span id='exports'>
@@ -132,7 +131,7 @@ function dom (state) {
             ${controls}
           </table>
         </span>
-        <span id='paramsControls'>
+        <span id='paramsControls' style='visibility:${state.design.paramDefinitions.length === 0 ? 'hidden' : 'visible'}'>
           <button id='updateDesignFromParams'>Update</button>
           <label for='instantUpdate'>Instant Update</label>
           <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
@@ -146,30 +145,20 @@ function dom (state) {
   return output
   // width=1000 height= 1000
 }
-/* state$.take(1).forEach(function (state) {
-  tree = dom(state)
-  document.body.appendChild(tree)
-})
-state$
-  .skip(1)
-  .skipRepeatsWith(function (state, previousState) {
-    const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
-    const sameExportFormats = state.exportFormat === previousState.exportFormat &&
-     state.availableExportFormats === previousState.availableExportFormats
-    const sameStatus = state.busy === previousState.busy
-    return sameParamDefinitions && sameExportFormats && sameStatus
-  })
-  .forEach(function (state) {
-    morph(tree, dom(state))
-  }) */
 
 const outToDom$ = state$
   .skipRepeatsWith(function (state, previousState) {
     const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
+    const sameInstantUpdate = state.instantUpdate === previousState.instantUpdate
+
     const sameExportFormats = state.exportFormat === previousState.exportFormat &&
     state.availableExportFormats === previousState.availableExportFormats
+
     const sameStatus = state.busy === previousState.busy
-    return sameParamDefinitions && sameExportFormats && sameStatus
+    const sameStyling = state.themeName === previousState.themeName
+
+    const sameAutoreload = state.autoReload === previousState.autoReload
+    return sameParamDefinitions && sameExportFormats && sameStatus && sameStyling && sameAutoreload && sameInstantUpdate
   })
   .map(state => dom(state))
 
@@ -189,6 +178,7 @@ state$
   ]
   ) */
   .forEach(params => {
+    console.log('changing viewer')
     const viewerElement = document.getElementById('renderTarget')
     setCanvasSize(viewerElement)
     if (viewerElement && !csgViewer) {

@@ -18,30 +18,54 @@ const makeActions = (sources) => {
     console.log('param changes', data)
   })
 
-  /*const toggleGrid$ = most.mergeArray([
-    most.fromEvent('click', document.getElementById('grid')).map(e => e.target.checked),
+  const toggleGrid$ = most.mergeArray([
+    sources.dom.select('#grid').events('click')
+      .map(e => e.target.checked),
     sources.store.map(data => data.viewer.grid.show)
   ])
     .map(data => ({type: 'toggleGrid', data}))
 
+  const toggleAxes$ = most.mergeArray([
+    sources.dom.select('#toggleAxes').events('click')
+      .map(e => e.target.checked)
+    //sources.store.map(data => data.viewer.grid.show)
+  ])
+    .map(data => ({type: 'toggleAxes', data}))
+
   const toggleAutorotate$ = most.mergeArray([
-    most.fromEvent('click', document.getElementById('autoRotate')).map(e => e.target.checked)
+    sources.dom.select('#autoRotate').events('click')
+    .map(e => e.target.checked)
       // sources.store.map(data => data.viewer.grid.show)
   ])
     .map(data => ({type: 'toggleAutorotate', data}))
 
+  const changeTheme$ = most.mergeArray([
+    sources.dom.select('#themeSwitcher').events('change')
+      .map(e => e.target.value),
+    sources.store.map(data => data.themeName)
+  ])
+  .map(data => ({type: 'changeTheme', data}))
+
+  // non visual related actions
   const toggleAutoReload$ = most.mergeArray([
-    most.fromEvent('click', document.getElementById('autoReload'))
+    sources.dom.select('#autoReload').events('click')
       .map(e => e.target.checked),
-    sources.store.map(data => data.autoReload)
+    sources.store
+      .map(data => data.autoReload)
   ])
   .map(data => ({type: 'toggleAutoReload', data}))
 
-  const changeExportFormat$ = most.fromEvent('change', document.getElementById('exportFormats'))
+  const toggleInstantUpdate$ = most.mergeArray([
+    sources.dom.select('#instantUpdate').events('click').map(event => event.target.checked),
+    sources.store.map(data => data.instantUpdate)
+  ])
+    .map(data => ({type: 'toggleInstantUpdate', data}))
+
+  const changeExportFormat$ = sources.dom.select('#exportFormats').events('change')
     .map(e => e.target.value)
     .map(data => ({type: 'changeExportFormat', data}))
 
-  const exportRequested$ = most.fromEvent('click', document.getElementById('exportBtn'))
+  const exportRequested$ = sources.dom.select('#exportBtn').events('click')
     .sample(function (state, event) {
       console.log('state stuff', state, event)
       const defaultExportFilePath = state.exportFilePath
@@ -58,22 +82,12 @@ const makeActions = (sources) => {
     })
     .map(data => ({type: 'exportRequested', data}))
 
-  const changeTheme$ = most.mergeArray([
-    most.fromEvent('change', document.getElementById('themeSwitcher')).map(e => e.target.value),
-    sources.store.map(data => data.themeName)
-  ])
-  .map(data => ({type: 'changeTheme', data}))
-
-  // non visual related actions
-  const toggleInstantUpdate$ = most.fromEvent('click', document.getElementById('instantUpdate'))
-    .map(event => ({type: 'toggleInstantUpdate', data: event.target.checked}))*/
-
   const designPath$ = most.mergeArray([
-    /*most.fromEvent('click', document.getElementById('fileLoader'))
+    sources.dom.select('#fileLoader').events('click')
       .map(function () {
         const paths = dialog.showOpenDialog({properties: ['openFile', 'openDirectory', 'multiSelections']})
         return paths
-      }),*/
+      }),
     sources.store
       .map(data => data.design.mainPath)
       .filter(data => data !== '')
@@ -99,29 +113,28 @@ const makeActions = (sources) => {
   ])
     .map(data => ({type: 'setDesignScriptContent', data}))
 
+  // design parameter change actions
   const updateDesignFromParams$ = most.mergeArray([
-    /*most.fromEvent('click', document.getElementById('updateDesignFromParams'))
+    sources.dom.select('#updateDesignFromParams').events('click')
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
-        const paramValues = require('./core/getParamValues')(controls)
-        return paramValues
-      }),*/
+        return {paramValues: require('./core/getParamValues')(controls), origin: 'manualUpdate'}
+      }),
     sources.paramChanges.map(function (controls) {
-      const paramValues = require('./core/getParamValues')(controls)
-      console.log('paramValues', paramValues)
-      return paramValues
+      return {paramValues: require('./core/getParamValues')(controls), origin: 'instantUpdate'}
     })
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
 
   return {
-    /*toggleGrid$,
+    toggleGrid$,
+    toggleAxes$,
     toggleAutorotate$,
     toggleAutoReload$,
     toggleInstantUpdate$,
     changeExportFormat$,
     exportRequested$,
-    changeTheme$,*/
+    changeTheme$,
     setDesignPath$,
     designLoadRequested$,
     updateDesignFromParams$
