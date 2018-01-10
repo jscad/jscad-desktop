@@ -14,6 +14,7 @@
   "dependencies": {
     "@jscad/amf-serializer": "^0.1.1",
     "@jscad/csg": "^0.3.7",
+    "@jscad/csg-viewer": "github:jscad/csg-viewer",
     "@jscad/dxf-serializer": "^0.1.2",
     "@jscad/io-utils": "^0.1.2",
     "@jscad/json-serializer": "^0.1.1",
