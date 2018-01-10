@@ -3,9 +3,28 @@ const most = require('most')
 const {remote} = require('electron')
 const {dialog} = remote
 const {getScriptFile} = require('./core/scripLoading')
+const {head} = require('./utils')
+
+function compositeKeyFromKeyEvent (event) {
+  const ctrl = event.ctrlKey ? 'ctrl+' : ''
+  const shift = event.shiftKey ? 'shift+' : ''
+  const meta = event.metaKey ? 'command+' : ''
+  let key = event.key.toLowerCase()
+  if (ctrl && key === 'control') {
+    key = ''
+  }
+  if (shift && key === 'shift') {
+    key = ''
+  }
+  if (meta && key === 'meta') {
+    key = ''
+  }
+  const compositeKey = `${ctrl}${shift}${meta}${key}`
+  return compositeKey
+}
 
 const makeActions = (sources) => {
-  sources.watcher.forEach(function (data) {
+  /* sources.watcher.forEach(function (data) {
     console.log('watchedFile', data)
   })
   sources.drops.forEach(function (data) {
@@ -16,7 +35,20 @@ const makeActions = (sources) => {
   })
   sources.paramChanges.forEach(function (data) {
     console.log('param changes', data)
-  })
+  }) */
+
+  // keyboard shortcut handling
+  const keyDowns$ = most.fromEvent('keyup', document)
+  const actionsFromKey$ = most.sample(function (event, state) {
+    const compositeKey = compositeKeyFromKeyEvent(event)
+    const matchingAction = head(state.shortcuts.filter(shortcut => shortcut.key === compositeKey))
+    if (matchingAction) {
+      const {command, args} = matchingAction
+      return {type: command, data: args}
+    }
+    return undefined
+  }, keyDowns$, keyDowns$, sources.state$)
+    .filter(x => x !== undefined)
 
   const toggleGrid$ = most.mergeArray([
     sources.dom.select('#grid').events('click')
@@ -28,7 +60,7 @@ const makeActions = (sources) => {
   const toggleAxes$ = most.mergeArray([
     sources.dom.select('#toggleAxes').events('click')
       .map(e => e.target.checked)
-    //sources.store.map(data => data.viewer.grid.show)
+    // sources.store.map(data => data.viewer.grid.show)
   ])
     .map(data => ({type: 'toggleAxes', data}))
 
@@ -127,17 +159,23 @@ const makeActions = (sources) => {
     .map(data => ({type: 'updateDesignFromParams', data}))
 
   return {
+    // generic key shortuct handler
+    actionsFromKey$,
+    // 3d viewer
     toggleGrid$,
     toggleAxes$,
     toggleAutorotate$,
+    // ui
+    changeTheme$,
     toggleAutoReload$,
     toggleInstantUpdate$,
-    changeExportFormat$,
-    exportRequested$,
-    changeTheme$,
+    // design
     setDesignPath$,
     designLoadRequested$,
-    updateDesignFromParams$
+    updateDesignFromParams$,
+    // exports
+    changeExportFormat$,
+    exportRequested$
   }
 }
 
