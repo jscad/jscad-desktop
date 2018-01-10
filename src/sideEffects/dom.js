@@ -42,15 +42,13 @@ function domSource () {
   }
 
   const select = function (query) {
-    console.log('selecting', query)
+    // console.log('selecting', query)
     const item = getElement(query)
 
     let outputStream
     if (!item || (item && item.length === 0)) {
-      // waitingForListeners.push(query)
       const eventProxy = proxy()
       outputStream = eventProxy.stream
-      // storedObservables[query] = eventProxy
       storedListeners[query] = {observable: eventProxy, live: false}
     }
 
@@ -62,13 +60,13 @@ function domSource () {
   }
 
   out$.forEach(function () {
-    console.log('dom source watching dom change')
+    // console.log('dom source watching dom change')
     Object.keys(storedListeners).forEach(function (query) {
       const item = getElement(query)
       if (item) {
         const storedListener = storedListeners[query]
         if (item.length === 1 && storedListener.live === false) {
-          console.log('HURRAY NOW I HAVE SOMETHING !!')          
+          // console.log('HURRAY NOW I HAVE SOMETHING !!')          
           const realObservable = most.fromEvent(storedListener.events, item[0])
           storedListener.observable.attach(realObservable)
           storedListener.live = true

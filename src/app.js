@@ -1,6 +1,6 @@
 const {proxy} = require('most-proxy')
-const {makeState, initialState} = require('./state')
-const makeCsgViewer = require('../../csg-viewer/src/index')
+const {makeState} = require('./state')
+const makeCsgViewer = require('../../csg-viewer/src/index')// require('csg-viewer')//
 
 let csgViewer
 
@@ -68,15 +68,22 @@ watcherSink(
     .skipRepeats()
 ) */
 
-// bla
+// viewer data
 state$
   .filter(state => state.design.mainPath !== '')
+  .skipRepeatsWith(function (state, previousState) {
+    // const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
+    // const sameParamValues = JSON.stringify(state.design.paramValues) === JSON.stringify(previousState.design.paramValues)
+    const sameSolids = state.design.solids.length === previousState.design.solids.length &&
+    JSON.stringify(state.design.solids) === JSON.stringify(previousState.design.solids)
+    return sameSolids
+  })
   /* .skipRepeatsWith((a, b) => {
     // console.log('FOObar', a, b)
     return a.design.mainPath === b.design.mainPath //&& b.design.solids
   }) */
   .forEach(state => {
-    console.log('changing solids')
+    // console.log('changing solids')
     if (csgViewer !== undefined) {
       csgViewer(undefined, {solids: state.design.solids})
     }
@@ -91,7 +98,6 @@ function dom (state) {
       return html`<option value=${name} selected='${state.exportFormat === name}'>${displayName}</option>`
     })
 
-  console.log('state', state.instantUpdate)
   const {createParamControls} = require('./ui/createParameterControls2')
   const {paramValues, paramDefinitions} = state.design
   const {controls} = createParamControls(paramValues, paramDefinitions, true, paramsCallbacktoStream.callback)
@@ -143,7 +149,6 @@ function dom (state) {
     </div>
   `
   return output
-  // width=1000 height= 1000
 }
 
 const outToDom$ = state$
@@ -152,7 +157,7 @@ const outToDom$ = state$
     const sameInstantUpdate = state.instantUpdate === previousState.instantUpdate
 
     const sameExportFormats = state.exportFormat === previousState.exportFormat &&
-    state.availableExportFormats === previousState.availableExportFormats
+      state.availableExportFormats === previousState.availableExportFormats
 
     const sameStatus = state.busy === previousState.busy
     const sameStyling = state.themeName === previousState.themeName
@@ -167,8 +172,8 @@ domSink(outToDom$)
 // for viewer
 state$
   .map(state => state.viewer)
-  .skipRepeatsWith(function (a, b) {
-    return JSON.parse(JSON.stringify(a)) === JSON.parse(JSON.stringify(b))
+  .skipRepeatsWith(function (state, previousState) {
+    return JSON.parse(JSON.stringify(state)) === JSON.parse(JSON.stringify(previousState))
   })
   /* require('most').mergeArray(
   [
@@ -178,9 +183,10 @@ state$
   ]
   ) */
   .forEach(params => {
-    console.log('changing viewer')
+    // console.log('changing viewer params')
     const viewerElement = document.getElementById('renderTarget')
     setCanvasSize(viewerElement)
+    // initialize viewer if it has not been done already
     if (viewerElement && !csgViewer) {
       const csgViewerItems = makeCsgViewer(viewerElement, params)
       csgViewer = csgViewerItems.csgViewer
@@ -198,7 +204,6 @@ function setCanvasSize (viewerElement) {
     const bounds = viewerElement.getBoundingClientRect()
     width = bounds.right - bounds.left
     height = bounds.bottom - bounds.top
-    // console.log('foo', width, height)
   }
   width *= pixelRatio
   height *= pixelRatio
