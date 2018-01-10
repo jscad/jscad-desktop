@@ -39,7 +39,7 @@ const getScriptFile = paths => {
   if (stats.isFile()) {
     return mainPath
   } else if (stats.isDirectory()) {
-    console.log('found dir')
+    // console.log('found dir')
     // first try to use package.json to find main
     const packageFile = path.join(mainPath, 'package.json')
     if (fs.existsSync(packageFile)) {
@@ -81,8 +81,8 @@ function loadScript (filePath, csgBasePath = './node_modules/@jscad') {
     const getParamsString = scriptAsText.includes('getParameterDefinitions')
       ? 'module.exports.getParameterDefinitions = getParameterDefinitions' : ''
     const commonJsScriptText = `
-    const {CSG, CAG} = require('${csgBasePath}/csg.js')
-    //const {CSG, CAG} = require('./node_modules/@jscad/csg')
+    //const {CSG, CAG} = require('${csgBasePath}/csg.js')
+    const {CSG, CAG} = require('${csgBasePath}/csg')
     const {square, circle, polygon} = require('${csgBasePath}/scad-api').primitives2d
     const {cube, cylinder, sphere, polyhedron, torus} = require('${csgBasePath}/scad-api').primitives3d
     const {color} = require('${csgBasePath}/scad-api').color
