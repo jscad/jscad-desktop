@@ -99,14 +99,14 @@ const makeActions = (sources) => {
 
   const exportRequested$ = sources.dom.select('#exportBtn').events('click')
     .sample(function (state, event) {
-      console.log('state stuff', state, event)
+      // console.log('state stuff', state, event)
       const defaultExportFilePath = state.exportFilePath
       return {defaultExportFilePath, exportFormat: state.exportFormat, data: state.design.solids}
     }, sources.state$)
     .map(function ({defaultExportFilePath, exportFormat, data}) {
-      console.log('exporting data to', defaultExportFilePath)
+      // console.log('exporting data to', defaultExportFilePath)
       const filePath = dialog.showSaveDialog({properties: ['saveFile'], title: 'export design to', defaultPath: defaultExportFilePath})//, function (filePath) {
-      console.log('saving', filePath)
+      // console.log('saving', filePath)
       if (filePath !== undefined) {
         const saveDataToFs = require('./io/saveDataToFs')
         saveDataToFs(data, exportFormat, filePath)
@@ -131,6 +131,7 @@ const makeActions = (sources) => {
       .map(path => [path])
   ])
     .filter(data => data !== undefined)
+    .debounce(300)
     .multicast()
 
   const designLoadRequested$ = designPath$
