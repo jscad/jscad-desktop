@@ -45,14 +45,14 @@ const initialState = {
     axes: {
       show: true
     },
-    lighting: {
-      smooth: true
-    },
+    smoothNormals: true,
     // UGH
     behaviours: {
       resetViewOn: []
     }
-  }
+  },
+  // UI
+  shortcuts: require('../data/keybindings.json')
 }
 
 function makeState (actions) {
@@ -74,9 +74,17 @@ function makeState (actions) {
       const viewer = Object.assign({}, state.viewer, {axes})
       return Object.assign({}, state, {viewer})
     },
+    toPresetView: (state, viewName) => {
+      const viewer = Object.assign({}, state.viewer, {camera: {position: viewName}})
+      return Object.assign({}, state, {viewer})
+    },
+    setProjectionType: (state, projectionType) => {
+      const viewer = Object.assign({}, state.viewer, {camera: {projectionType}})
+      return Object.assign({}, state, {viewer})
+    },
     changeTheme: (state, themeName) => {
       const themeData = themes[themeName]
-      console.log('changeTheme', themeName, themeData)
+      // console.log('changeTheme', themeName, themeData)
       const viewer = merge({}, state.viewer, themeData.viewer)
       return Object.assign({}, state, {viewer, themeName, mainTextColor: themeData.mainTextColor})
     },
@@ -84,11 +92,11 @@ function makeState (actions) {
       return Object.assign({}, state, {autoReload})
     },
     toggleInstantUpdate: (state, instantUpdate) => {
-      console.log('toggleInstantUpdate', instantUpdate)
+      // console.log('toggleInstantUpdate', instantUpdate)
       return Object.assign({}, state, {instantUpdate})
     },
     changeExportFormat: (state, exportFormat) => {
-      console.log('changeExportFormat', exportFormat)
+      // console.log('changeExportFormat', exportFormat)
       const path = require('path')
       const {formats} = require('./io/formats')
       const design = state.design
@@ -100,14 +108,14 @@ function makeState (actions) {
       return Object.assign({}, state, {exportFormat, exportFilePath})
     },
     designLoadRequested: (state, _) => {
-      console.log('designLoadRequested')
+      // console.log('designLoadRequested')
       // FIXME: UGHH so goddam verbose !
       // we want the viewer to focus on new entities for our 'session' (until design change)
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: ['new-entities']}})
       return Object.assign({}, state, {busy: true, viewer})
     },
     setDesignPath: (state, paths) => {
-      console.log('setDesignPath')
+      // console.log('setDesignPath')
       const mainPath = getScriptFile(paths)
       const filePath = paths[0]
       const path = require('path')
@@ -116,7 +124,7 @@ function makeState (actions) {
 
       // load script
       const {jscadScript, paramDefinitions, params} = loadScript(mainPath)
-      console.log('paramDefinitions', paramDefinitions, 'params', params)
+      // console.log('paramDefinitions', paramDefinitions, 'params', params)
       let solids = toArray(jscadScript(params))
       /*
         func(paramDefinitions) => paramsUI
@@ -147,7 +155,7 @@ function makeState (actions) {
       return Object.assign({}, state, {design, viewer}, {availableExportFormats, exportFormat, busy: false})
     },
     updateDesignFromParams: (state, {paramValues, origin}) => {
-      console.log('updateDesignFromParams')
+      // console.log('updateDesignFromParams')
       // disregard live updates if not enabled
       if (state.instantUpdate === false && origin === 'instantUpdate') {
         return state
