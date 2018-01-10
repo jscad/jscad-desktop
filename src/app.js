@@ -1,7 +1,7 @@
 const {proxy} = require('most-proxy')
 const {makeState} = require('./state')
-const makeCsgViewer = require('../../csg-viewer/src/index')// require('csg-viewer')//
-
+// const makeCsgViewer = require('../../csg-viewer/src/index')// //
+const makeCsgViewer = require('@jscad/csg-viewer')
 let csgViewer
 
 // all the side effects : ie , input/outputs
@@ -57,8 +57,8 @@ electronStoreSink(state$
 // data out to file watcher
 watcherSink(
   state$
-    .filter(state => state.design.mainPath !== '' && state.autoReload === true) // FIXME: disable watch if autoreload is set to false
-    .map(state => state.design.mainPath)
+    .filter(state => state.design.mainPath !== '') // FIXME: disable watch if autoreload is set to false
+    .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload}))
     .skipRepeats()
 )
 /* fsSink(
