@@ -3,8 +3,8 @@
 [![GitHub version](https://badge.fury.io/gh/jscad%2Fdesktop.svg)](https://badge.fury.io/gh/jscad%2Fdesktop)
 [![Build Status](https://travis-ci.org/jscad/desktop.svg)](https://travis-ci.org/jscad/desktop)
 
-![light ui](./docs/jscad-desktop-light.jpg)
-![dark ui](./docs/jscad-desktop-dark.jpg)
+![light ui](./docs/jscad-desktop-light.jp2)
+![dark ui](./docs/jscad-desktop-dark.jp2)
 
 
 > Experimental desktop jscad (openjscad) client, built using Electron
