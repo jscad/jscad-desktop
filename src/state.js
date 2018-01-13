@@ -96,16 +96,7 @@ function makeState (actions) {
       return Object.assign({}, state, {instantUpdate})
     },
     changeExportFormat: (state, exportFormat) => {
-      // console.log('changeExportFormat', exportFormat)
-      const path = require('path')
-      const {formats} = require('./io/formats')
-      const design = state.design
-
-      const extension = formats[exportFormat].extension
-      const defaultFileName = `${design.name}.${extension}`
-      const exportFilePath = path.join(design.path, defaultFileName)
-
-      return Object.assign({}, state, {exportFormat, exportFilePath})
+      return Object.assign({}, state, exportFilePathFromFormatAndDesign(state.design, exportFormat))
     },
     designLoadRequested: (state, _) => {
       // console.log('designLoadRequested')
@@ -152,7 +143,15 @@ function makeState (actions) {
       console.log('done updating design from path')
       // FIXME: UGHH so goddam verbose !
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: [''], zoomToFitOn: ['new-entities']}})
-      return Object.assign({}, state, {design, viewer}, {availableExportFormats, exportFormat, busy: false})
+      const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
+      const appTitle = `${packageMetadata.name} v ${packageMetadata.version}: ${designPath}`
+      return Object.assign({}, state, {design, viewer}, {
+        availableExportFormats,
+        exportFormat,
+        appTitle,
+        busy: false
+      },
+      exportInfos)
     },
     updateDesignFromParams: (state, {paramValues, origin}) => {
       // console.log('updateDesignFromParams')
@@ -189,3 +188,15 @@ function makeState (actions) {
 }
 
 module.exports = {makeState, initialState}
+
+// state utilities , extract at some point
+const exportFilePathFromFormatAndDesign = (design, exportFormat) => {
+  const path = require('path')
+  const {formats} = require('./io/formats')
+
+  const extension = formats[exportFormat].extension
+  const defaultFileName = `${design.name}.${extension}`
+  const exportFilePath = path.join(design.path, defaultFileName)
+
+  return {exportFormat, exportFilePath}
+}
