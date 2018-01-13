@@ -2,8 +2,8 @@ const path = require('path')
 const most = require('most')
 const {remote} = require('electron')
 const {dialog} = remote
-const {getScriptFile} = require('./core/scripLoading')
-const {head} = require('./utils')
+const {getScriptFile} = require('../core/scripLoading')
+const {head} = require('../utils')
 
 function compositeKeyFromKeyEvent (event) {
   const ctrl = event.ctrlKey ? 'ctrl+' : ''
@@ -108,7 +108,7 @@ const makeActions = (sources) => {
       const filePath = dialog.showSaveDialog({properties: ['saveFile'], title: 'export design to', defaultPath: defaultExportFilePath})//, function (filePath) {
       // console.log('saving', filePath)
       if (filePath !== undefined) {
-        const saveDataToFs = require('./io/saveDataToFs')
+        const saveDataToFs = require('../io/saveDataToFs')
         saveDataToFs(data, exportFormat, filePath)
       }
     })
@@ -151,10 +151,10 @@ const makeActions = (sources) => {
     sources.dom.select('#updateDesignFromParams').events('click')
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
-        return {paramValues: require('./core/getParamValues')(controls), origin: 'manualUpdate'}
+        return {paramValues: require('../core/getParamValues')(controls), origin: 'manualUpdate'}
       }),
     sources.paramChanges.map(function (controls) {
-      return {paramValues: require('./core/getParamValues')(controls), origin: 'instantUpdate'}
+      return {paramValues: require('../core/getParamValues')(controls), origin: 'instantUpdate'}
     })
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
