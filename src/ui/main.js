@@ -10,8 +10,14 @@ function dom (state, paramsCallbacktoStream) {
   const {paramValues, paramDefinitions} = state.design
   const {controls} = createParamControls(paramValues, paramDefinitions, true, paramsCallbacktoStream.callback)
 
+  const statusMessage = state.error !== undefined
+    ? `Error: ${state.error.message} details:  ${state.error.stack}` : ''
+
   const output = html`
     <div id='container' style='color:${state.mainTextColor}'>
+      <!--Status information/errors-->
+      <span id='busy'>${state.busy ? 'processing, please wait' : ''}</span>
+      <span id='status'>${statusMessage}</span>
       <!--Ui Controls-->
       <div id='controls'>
         <input type="button" value="load jscad (.js or .jscad) file" id="fileLoader"/>
@@ -35,8 +41,6 @@ function dom (state, paramsCallbacktoStream) {
           </select>
           <input type='button' value="export to ${state.exportFormat}" id="exportBtn"/>
         </span>
-
-        <span id='busy'>${state.busy ? 'processing, please wait' : ''}</span>
       </div>
       <!--Params-->
       <span id='params'>

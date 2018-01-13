@@ -11,6 +11,8 @@ const themes = {
 
 const initialState = {
   appTitle: `${packageMetadata.name} v ${packageMetadata.version}`,
+  // for possible errors
+  error: undefined,
   // design data
   design: {
     name: '',
@@ -34,6 +36,7 @@ const initialState = {
   themeName: 'light',
   mainTextColor: '#FFF',
   viewer: {// ridiculous shadowing of viewer state ?? or actually logical
+    camera: {position: [150, 150, 250]},
     rendering: {
       background: [0.211, 0.2, 0.207, 1], // [1, 1, 1, 1],//54, 51, 53
       meshColor: [0.4, 0.6, 0.5, 1] // nice orange : [1, 0.4, 0, 1]
@@ -149,7 +152,8 @@ function makeState (actions) {
         availableExportFormats,
         exportFormat,
         appTitle,
-        busy: false
+        busy: false,
+        error: undefined
       },
       exportInfos)
     },
@@ -176,7 +180,7 @@ function makeState (actions) {
         return newState
       } catch (error) {
         console.error('caught error', error)
-        return merge({}, state, {error})
+        return Object.assign({}, state, {error})
       }
       // const newState = merge({}, state, updatedData)
       // console.log('SCAAAN', action, newState)

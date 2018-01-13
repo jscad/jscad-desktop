@@ -19,7 +19,7 @@ const paramsCallbacktoStream = require('./observable-utils/callbackToObservable'
 const { attach, stream } = proxy()
 const state$ = stream
 //
-const actions$ = require('./actions')({
+const actions$ = require('./actions/actions')({
   store: storeSource$,
   drops: dragAndDropSource$,
   watcher: watcherSource(),
@@ -99,11 +99,15 @@ const outToDom$ = state$
     const sameExportFormats = state.exportFormat === previousState.exportFormat &&
       state.availableExportFormats === previousState.availableExportFormats
 
-    const sameStatus = state.busy === previousState.busy
     const sameStyling = state.themeName === previousState.themeName
 
     const sameAutoreload = state.autoReload === previousState.autoReload
-    return sameParamDefinitions && sameExportFormats && sameStatus && sameStyling && sameAutoreload && sameInstantUpdate
+
+    const sameError = JSON.stringify(state.error) === JSON.stringify(previousState.error)
+    const sameStatus = state.busy === previousState.busy
+
+    return sameParamDefinitions && sameExportFormats && sameStatus && sameStyling &&
+      sameAutoreload && sameInstantUpdate && sameError
   })
   .map(state => require('./ui/main')(state, paramsCallbacktoStream))
 
@@ -157,3 +161,4 @@ function setCanvasSize (viewerElement) {
 window.onresize = function () {
   setCanvasSize(document.getElementById('renderTarget'))
 }
+
