@@ -58,15 +58,16 @@ electronStoreSink(state$
 watcherSink(
   state$
     .filter(state => state.design.mainPath !== '') // FIXME: disable watch if autoreload is set to false
-    .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload}))
     .skipRepeats()
+    .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload}))
 )
-/* fsSink(
+fsSink(
   state$
     .filter(state => state.design.mainPath !== '')
-    .map(state => ({operation: 'read', id: 'loadScript', path: state.design.mainPath}))
+    .map(state => state.design.mainPath)
     .skipRepeats()
-) */
+    .map(path => ({operation: 'read', id: 'loadScript', path}))
+)
 
 // viewer data
 state$
@@ -161,4 +162,3 @@ function setCanvasSize (viewerElement) {
 window.onresize = function () {
   setCanvasSize(document.getElementById('renderTarget'))
 }
-

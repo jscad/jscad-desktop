@@ -126,25 +126,21 @@ const makeActions = (sources) => {
       .map(data => [data]),
     sources.drops
       .filter(drop => drop.type === 'fileOrFolder' && drop.data.length > 0)
-      .map(drop => drop.data.map(fileOrFolder => fileOrFolder.path)),
-    sources.watcher
-      .map(path => [path])
+      .map(drop => drop.data.map(fileOrFolder => fileOrFolder.path))
   ])
     .filter(data => data !== undefined)
-    .debounce(300)
+    .debounce(50)
     .multicast()
-
-  const designLoadRequested$ = designPath$
-    .map(data => ({type: 'designLoadRequested', data}))
 
   const setDesignPath$ = designPath$
     .map(data => ({type: 'setDesignPath', data}))
     .delay(1)
 
-  const setDesignScriptContent$ = most.mergeArray([
-    sources.fs.filter()
+  const setDesignContent$ = most.mergeArray([
+    sources.fs.filter(data => data.operation === 'read').map(raw => raw.data),
+    sources.watcher// .map(content => )
   ])
-    .map(data => ({type: 'setDesignScriptContent', data}))
+    .map(data => ({type: 'setDesignContent', data}))
 
   // design parameter change actions
   const updateDesignFromParams$ = most.mergeArray([
@@ -172,7 +168,7 @@ const makeActions = (sources) => {
     toggleInstantUpdate$,
     // design
     setDesignPath$,
-    designLoadRequested$,
+    setDesignContent$,
     updateDesignFromParams$,
     // exports
     changeExportFormat$,
