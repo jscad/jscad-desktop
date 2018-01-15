@@ -13,6 +13,8 @@ function dom (state, paramsCallbacktoStream) {
   const statusMessage = state.error !== undefined
     ? `Error: ${state.error.message} details:  ${state.error.stack}` : ''
 
+  const exportButtonText = `export design to ${state.exportFormat}`
+
   const output = html`
     <div id='container' style='color:${state.mainTextColor}'>
       <!--Status information/errors-->
@@ -39,7 +41,7 @@ function dom (state, paramsCallbacktoStream) {
           <select id='exportFormats'>
           ${formatsList}
           </select>
-          <input type='button' value="export to ${state.exportFormat}" id="exportBtn"/>
+          <input type='button' value="${exportButtonText}" id="exportBtn"/>
         </span>
       </div>
       <!--Params-->
