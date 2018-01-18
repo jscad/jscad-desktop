@@ -10,7 +10,7 @@ const themes = {
 }
 
 const initialState = {
-  appTitle: `${packageMetadata.name} v ${packageMetadata.version}`,
+  appTitle: `jscad v ${packageMetadata.version}`,
   // for possible errors
   error: undefined,
   // design data
@@ -22,7 +22,9 @@ const initialState = {
     paramDefinitions: [],
     paramValues: {},
     previousParams: {},
-    solids: []
+    solids: [],
+    // list of all paths of require() calls + main
+    modulePaths: []
   },
   // export
   exportFormat: '',
@@ -102,7 +104,7 @@ function makeState (actions) {
       return Object.assign({}, state, exportFilePathFromFormatAndDesign(state.design, exportFormat))
     },
     setDesignPath: (state, paths) => {
-      // console.log('setDesignPath')
+      console.log('setDesignPath')
       const mainPath = getScriptFile(paths)
       const filePath = paths[0]
       const path = require('path')
@@ -119,11 +121,40 @@ function makeState (actions) {
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: ['new-entities']}})
       return Object.assign({}, state, {busy: true, viewer, design})
     },
-    setDesignContent: (state, scriptAsText) => {
+    setDesignContent: (state, mainScriptAsText) => {
       console.log('setDesignContent')
+      const path = require('path')
+      // experimental
+      //const {astFromSource, csgTree} = require('./core/code-analysis/index')
+      //const ast = astFromSource(mainScriptAsText)
+      //const prevAst = astFromSource(state.design.script)
+      /*console.log('ast', ast)
+
+      const differences = findByPredicate(isDifference, node => node, ast)
+      console.log('differences', differences)
+
+      const cubes = findByPredicate(isCube, node => node, ast)
+      console.log('cubes', cubes)
+
+      const spheres = findByPredicate(isSphere, node => node, ast)
+      console.log('spheres', spheres)*/
+      //console.log('previous ast')
+      //csgTree(prevAst)
+      //console.log('current ast', ast)
+      // csgTree(ast)
+      //
+      // console.log('setDesignContent')
+      const detective = require('detective-cjs')
+      const rawDependencies = detective(mainScriptAsText)
+      const dependencies = Array.from(new Set(rawDependencies))
       const {mainPath} = state.design
+
+      const dependencyAbsPaths = dependencies.map(depPath => path.join(state.design.path, depPath))
+      const scriptModulePaths = [mainPath, ...dependencyAbsPaths]
+      // console.log('all script paths', scriptModulePaths)
+      // require('./core/scripLoading').requireUncached(mainPath)
       // load script
-      const {jscadScript, paramDefinitions, params} = loadScript(scriptAsText, mainPath)
+      const {jscadScript, paramDefinitions, params} = loadScript(mainScriptAsText, mainPath)
       // console.log('paramDefinitions', paramDefinitions, 'params', params)
       let solids = toArray(jscadScript(params))
       /*
@@ -134,7 +165,8 @@ function makeState (actions) {
         script: jscadScript,
         paramDefinitions,
         paramValues: params,
-        solids
+        solids,
+        modulePaths: scriptModulePaths
       })
 
       const {supportedFormatsForObjects, formats} = require('./io/formats')
@@ -150,7 +182,7 @@ function makeState (actions) {
       // FIXME: UGHH so goddam verbose !
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: [''], zoomToFitOn: ['new-entities']}})
       const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
-      const appTitle = `${packageMetadata.name} v ${packageMetadata.version}: ${state.design.path}`
+      const appTitle = `jscad v ${packageMetadata.version}: ${state.design.name}`
       return Object.assign({}, state, {design, viewer}, {
         availableExportFormats,
         exportFormat,

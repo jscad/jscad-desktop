@@ -138,7 +138,7 @@ const makeActions = (sources) => {
 
   const setDesignContent$ = most.mergeArray([
     sources.fs.filter(data => data.operation === 'read').map(raw => raw.data),
-    sources.watcher// .map(content => )
+    sources.watcher.map(({filePath, contents}) => contents)
   ])
     .map(data => ({type: 'setDesignContent', data}))
 
@@ -149,9 +149,11 @@ const makeActions = (sources) => {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
         return {paramValues: require('../core/getParamValues')(controls), origin: 'manualUpdate'}
       }),
-    sources.paramChanges.map(function (controls) {
+    sources.paramChanges.multicast().map(function (controls) {
       return {paramValues: require('../core/getParamValues')(controls), origin: 'instantUpdate'}
     })
+      .tap(x=>console.log('fdfd'))
+      .recoverWith(e => most.of({error: e}))
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
 
