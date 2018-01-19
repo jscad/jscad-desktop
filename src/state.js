@@ -125,9 +125,9 @@ function makeState (actions) {
       console.log('setDesignContent')
       const path = require('path')
       // experimental
-      //const {astFromSource, csgTree} = require('./core/code-analysis/index')
-      //const ast = astFromSource(mainScriptAsText)
-      //const prevAst = astFromSource(state.design.script)
+      // const {astFromSource, csgTree} = require('./core/code-analysis/index')
+      // const ast = astFromSource(mainScriptAsText)
+      // const prevAst = astFromSource(state.design.script)
       /*console.log('ast', ast)
 
       const differences = findByPredicate(isDifference, node => node, ast)
@@ -137,10 +137,10 @@ function makeState (actions) {
       console.log('cubes', cubes)
 
       const spheres = findByPredicate(isSphere, node => node, ast)
-      console.log('spheres', spheres)*/
-      //console.log('previous ast')
-      //csgTree(prevAst)
-      //console.log('current ast', ast)
+      console.log('spheres', spheres) */
+      // console.log('previous ast')
+      // csgTree(prevAst)
+      // console.log('current ast', ast)
       // csgTree(ast)
       //
       // console.log('setDesignContent')
@@ -192,7 +192,11 @@ function makeState (actions) {
       },
       exportInfos)
     },
-    updateDesignFromParams: (state, {paramValues, origin}) => {
+    updateDesignFromParams: (state, {paramValues, origin, error}) => {
+      if (error) {
+        throw error
+        // return Object.assign({}, state, {error})
+      }
       // console.log('updateDesignFromParams')
       // disregard live updates if not enabled
       if (state.instantUpdate === false && origin === 'instantUpdate') {
@@ -204,6 +208,11 @@ function makeState (actions) {
       const solids = toArray(script.main(paramValues))
       const design = Object.assign({}, originalDesign, {solids, paramValues})
       return Object.assign({}, state, {design})
+    },
+
+    clearErrors: (state, _) => {
+      console.log('clear errors')
+      return Object.assign({}, state, {error: undefined})
     }
   }
 

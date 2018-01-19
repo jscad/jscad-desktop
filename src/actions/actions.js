@@ -150,16 +150,32 @@ const makeActions = (sources) => {
         return {paramValues: require('../core/getParamValues')(controls), origin: 'manualUpdate'}
       }),
     sources.paramChanges.multicast().map(function (controls) {
-      return {paramValues: require('../core/getParamValues')(controls), origin: 'instantUpdate'}
+      // FIXME: clunky
+      try {
+        const paramValues = require('../core/getParamValues')(controls)
+        return {paramValues, origin: 'instantUpdate'}
+      } catch (error) {
+        return {error, origin: 'instantUpdate'}
+      }
     })
-      .tap(x=>console.log('fdfd'))
-      .recoverWith(e => most.of({error: e}))
+      .tap(x => console.log('fdfd'))
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
+
+  const clearErrors$ = sources.state$
+    .filter(state => state.error !== undefined)
+    .map(state => state.error)
+    .skipRepeats()
+    .map(x => undefined)
+    .map(data => ({type: 'clearErrors', data}))
+    .delay(6000)
+    // .forEach(x => console.log('clear errors', x))
 
   return {
     // generic key shortuct handler
     actionsFromKey$,
+    // generic clear error action
+    clearErrors$,
     // 3d viewer
     toggleGrid$,
     toggleAxes$,
