@@ -154,15 +154,15 @@ function makeState (actions) {
       // console.log('all script paths', scriptModulePaths)
       // require('./core/scripLoading').requireUncached(mainPath)
       // load script
-      const {jscadScript, paramDefinitions, params} = loadScript(mainScriptAsText, mainPath)
+      const {scriptRootModule, paramDefinitions, params} = loadScript(mainScriptAsText, mainPath)
       // console.log('paramDefinitions', paramDefinitions, 'params', params)
-      let solids = toArray(jscadScript(params))
+      let solids = toArray(scriptRootModule.main(params))
       /*
         func(paramDefinitions) => paramsUI
         func(paramsUI + interaction) => params
       */
       const design = Object.assign({}, state.design, {
-        script: jscadScript,
+        script: scriptRootModule,
         paramDefinitions,
         paramValues: params,
         solids,

@@ -36,7 +36,7 @@ function requireFromString (src, filename) {
 
 // from https://stackoverflow.com/questions/9210542/node-js-require-cache-possible-to-invalidate/16060619#16060619
 function requireUncached (moduleName) {
-  /*console.log(`removing ${moduleName} from cache`)
+  /* console.log(`removing ${moduleName} from cache`)
   delete require.cache[require.resolve(moduleName)]
 
   Object.keys(module.constructor._pathCache).forEach(function (cacheKey) {
@@ -44,13 +44,13 @@ function requireUncached (moduleName) {
       delete module.constructor._pathCache[cacheKey]
     }
   })
-  return require(moduleName)*/
+  return require(moduleName) */
   var decache = require('decache')
   decache(moduleName)
 }
 
-const hasScriptGotParameters = scriptSrc => {
-  return scriptSrc && 'getParameterDefinitions' in scriptSrc
+const doesModuleExportParameterDefiniitions = moduleToCheck => {
+  return moduleToCheck && 'getParameterDefinitions' in moduleToCheck
 }
 
 const getScriptFile = paths => {
@@ -101,7 +101,7 @@ function loadScript (scriptAsText, filePath, csgBasePath = '@jscad/scad-api') {
     csgBasePath = path.resolve(__dirname, csgBasePath)
   }
   console.log('loading script using jscad/csg base path at:', csgBasePath)
-  let jscadScript
+  let scriptRootModule
   // && !scriptAsText.includes('require(')
   if ((!scriptAsText.includes('module.exports')) && scriptAsText.includes('main')) {
     const getParamsString = scriptAsText.includes('getParameterDefinitions')
@@ -121,20 +121,24 @@ function loadScript (scriptAsText, filePath, csgBasePath = '@jscad/scad-api') {
     const {echo} = require('${csgBasePath}').debug
     
     ${scriptAsText}
-    module.exports = main
+    module.exports.main = main
     ${getParamsString}
     `
-    jscadScript = requireFromString(commonJsScriptText, filePath)
+    scriptRootModule = requireFromString(commonJsScriptText, filePath)
   } else {
-    jscadScript = require(filePath)
+    scriptRootModule = require(filePath)
+  }
+  if ((typeof (scriptRootModule) === 'function')) { // single export ???
+    console.warn('please use named exports for your main() function !')
+    scriptRootModule = {main: scriptRootModule}
   }
   let params = {}
   let paramDefinitions = []
-  if (hasScriptGotParameters(jscadScript)) {
-    paramDefinitions = jscadScript.getParameterDefinitions()
-    params = getParameterDefinitionsCLI(jscadScript.getParameterDefinitions)
+  if (doesModuleExportParameterDefiniitions(scriptRootModule)) {
+    paramDefinitions = scriptRootModule.getParameterDefinitions() || []
+    params = getParameterDefinitionsCLI(scriptRootModule.getParameterDefinitions)
   }
-  return {params, paramDefinitions, jscadScript}
+  return {params, paramDefinitions, scriptRootModule: scriptRootModule}
 }
 
 function watchScript (filePath, callback) {
