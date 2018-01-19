@@ -162,13 +162,13 @@ const makeActions = (sources) => {
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
 
-  const clearErrors$ = sources.state$
+  const clearErrors$ = most.never() /* sources.state$
     .filter(state => state.error !== undefined)
     .map(state => state.error)
     .skipRepeats()
     .map(x => undefined)
     .map(data => ({type: 'clearErrors', data}))
-    .delay(6000)
+    .delay(30000)*/
     // .forEach(x => console.log('clear errors', x))
 
   return {

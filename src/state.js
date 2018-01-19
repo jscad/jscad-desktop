@@ -207,7 +207,7 @@ function makeState (actions) {
 
       const solids = toArray(script.main(paramValues))
       const design = Object.assign({}, originalDesign, {solids, paramValues})
-      return Object.assign({}, state, {design})
+      return Object.assign({}, state, {design, error: undefined})
     },
 
     clearErrors: (state, _) => {
