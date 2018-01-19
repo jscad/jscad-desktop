@@ -73,7 +73,15 @@ function watchMultiplePaths (paths, callback) {
   return watchers
 }
 
+const removeWatchers = watchers => {
+  watchers.map(watcher => {
+    watcher.close()
+    return undefined
+  })
+}
+
 function watchTree (rootPath, callback) {
+  // console.log('watchTree')
   let prevContents = {}
   let watchers = []
   let allDependencyPaths = Array.from(new Set(flatten(resolveDependencies(undefined, rootPath))))
@@ -86,13 +94,6 @@ function watchTree (rootPath, callback) {
       return watcher
     })
 
-  const removeWatchers = watchers => {
-    watchers.map(watcher => {
-      watcher.close()
-      return undefined
-    })
-  }
-
   const handleWatch = (filePath, eventType, filename) => {
     requireUncached(filePath)
     const contents = fs.readFileSync(filePath, 'utf8')
@@ -104,9 +105,10 @@ function watchTree (rootPath, callback) {
       // now clear all watchers if needed
       const updatedDepencyPaths = Array.from(new Set(flatten(resolveDependencies(undefined, rootPath))))
       const depsChange = JSON.stringify(updatedDepencyPaths.sort()) !== JSON.stringify(allDependencyPaths)
-      console.log('depsChange', depsChange, updatedDepencyPaths, allDependencyPaths)
+      // console.log('depsChange', depsChange, updatedDepencyPaths, allDependencyPaths)
       if (depsChange) {
         removeWatchers(watchers)
+        allDependencyPaths = updatedDepencyPaths
         watchers = createWatchers(updatedDepencyPaths)
       }
     }
@@ -125,31 +127,22 @@ function watcherSink (toWatch$) {
   toWatch$.forEach(function ({filePath, enabled}) {
     const rootPath = filePath
     if (enabled === false) {
-      if (watcher !== undefined) {
+      if (watchers.length > 0 && watchers[0] !== undefined) {
         // console.log('stopping to watch', filePath, enabled)
-        watcher.close()
-        watcher = undefined
-        watchers.map(watcher => {
-          watcher.close()
-          return undefined
-        })
+        removeWatchers(watchers)
       }
     } else {
       if (watchedFilePath !== rootPath) {
-        if (watcher !== undefined) {
+        if (watchers.length > 0 && watchers[0] !== undefined) {
           // console.log('stopping to watch', filePath, enabled)
-          watcher.close()
-          watcher = undefined
-          watchers.map(watcher => {
-            watcher.close()
-            return undefined
-          })
+          removeWatchers(watchers)
         }
       }
-      if (watchedFilePath !== rootPath || watcher === undefined) {
+      if (watchedFilePath !== rootPath || watchers[0] === undefined) {
         watchedFilePath = rootPath
+
         function stuffCallback (data) {
-          console.log('changed', data.filePath)//, data.contents)
+          // console.log('changed', data.filePath)//, data.contents)
           // requireUncached(data.filePath)
           requireUncached(rootPath)
           // force reload the main file
@@ -165,7 +158,7 @@ function watcherSink (toWatch$) {
 
 function watcherSource () {
   return scriptDataFromCB.stream
-    .debounce(400)// debounce is very important as fs.Watch is unstable
+    .debounce(400)
     .skipRepeats()
     .multicast()
 }
