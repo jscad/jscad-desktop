@@ -201,7 +201,7 @@ function makeState (actions) {
       let originalDesign = state.design
       const {script} = originalDesign
 
-      const solids = toArray(script(paramValues))
+      const solids = toArray(script.main(paramValues))
       const design = Object.assign({}, originalDesign, {solids, paramValues})
       return Object.assign({}, state, {design})
     }
