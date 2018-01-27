@@ -1,6 +1,5 @@
 const {proxy} = require('most-proxy')
 const {makeState} = require('./state')
-// const makeCsgViewer = require('../../csg-viewer/src/index')// //
 const makeCsgViewer = require('@jscad/csg-viewer')
 let csgViewer
 
@@ -14,20 +13,24 @@ const {watcherSink, watcherSource} = require('./sideEffects/fileWatcher')
 const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
 const {domSink, domSource} = require('./sideEffects/dom')
 const paramsCallbacktoStream = require('./observable-utils/callbackToObservable')()
+const makeWorkerEffect = require('./sideEffects/worker')
+const solidWorker = makeWorkerEffect(new Worker('src/worker.js'))
 
 // proxy state stream to be able to access & manipulate it before it is actually available
 const { attach, stream } = proxy()
 const state$ = stream
 //
-const actions$ = require('./actions/actions')({
+const sources = {
   store: storeSource$,
   drops: dragAndDropSource$,
   watcher: watcherSource(),
   fs: fsSource(),
   paramChanges: paramsCallbacktoStream.stream,
   state$,
-  dom: domSource()
-})
+  dom: domSource(),
+  solidWorker: solidWorker.source()
+}
+const actions$ = require('./actions/actions')(sources)
 
 attach(makeState(Object.values(actions$)))
 
@@ -57,16 +60,26 @@ electronStoreSink(state$
 // data out to file watcher
 watcherSink(
   state$
-    .filter(state => state.design.mainPath !== '') 
+    .filter(state => state.design.mainPath !== '')
     .skipRepeats()
     .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload})) // enable/disable watch if autoreload is set to false
 )
+// data out to file system sink
 fsSink(
   state$
     .filter(state => state.design.mainPath !== '')
     .map(state => state.design.mainPath)
     .skipRepeats()
     .map(path => ({operation: 'read', id: 'loadScript', path}))
+)
+
+const most = require('most')
+solidWorker.sink(
+  most.mergeArray([
+    sources.fs.filter(data => data.operation === 'read').map(raw => raw.data),
+    sources.watcher.map(({filePath, contents}) => contents)
+  ])
+    .map(source => ({cmd: 'render', options: {mainPath: ''}, source}))
 )
 
 // viewer data

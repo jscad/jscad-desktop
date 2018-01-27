@@ -162,20 +162,48 @@ const makeActions = (sources) => {
   ])
     .map(data => ({type: 'updateDesignFromParams', data}))
 
+  const setDesignSolids$ = most.mergeArray([
+    sources.solidWorker
+      .filter(event => !('error' in event))
+      .map(function (event) {
+        if (event.data instanceof Object) {
+          const { CAG, CSG } = require('@jscad/csg')
+          const solids = event.data.solids.map(function (object) {
+            if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
+            if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
+          })
+          console.log('solids', solids)
+          return solids
+        }
+      })
+  ])
+    .map(data => ({type: 'setDesignSolids', data}))
+
+  const setErrors$ = most.mergeArray([
+    sources.solidWorker.filter(event => 'error' in event)
+  ])
+    .map(data => ({type: 'setErrors', data}))
+
   const clearErrors$ = most.never() /* sources.state$
     .filter(state => state.error !== undefined)
     .map(state => state.error)
     .skipRepeats()
     .map(x => undefined)
     .map(data => ({type: 'clearErrors', data}))
-    .delay(30000)*/
+    .delay(30000) */
     // .forEach(x => console.log('clear errors', x))
+
+  const timeOutDesignGeneration$ = designPath$
+    .delay(20000)
+    .map(data => ({type: 'timeOutDesignGeneration', data}))
+    .tap(x => console.log('timeOutDesignGeneration'))
 
   return {
     // generic key shortuct handler
     actionsFromKey$,
     // generic clear error action
     clearErrors$,
+    setErrors$,
     // 3d viewer
     toggleGrid$,
     toggleAxes$,
@@ -188,6 +216,8 @@ const makeActions = (sources) => {
     setDesignPath$,
     setDesignContent$,
     updateDesignFromParams$,
+    timeOutDesignGeneration$,
+    setDesignSolids$,
     // exports
     changeExportFormat$,
     exportRequested$
