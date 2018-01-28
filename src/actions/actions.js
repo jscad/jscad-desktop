@@ -146,8 +146,12 @@ const makeActions = (sources) => {
     sources.dom.select('#updateDesignFromParams').events('click')
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
-        return {paramValues: require('../core/getParamValues')(controls), origin: 'manualUpdate'}
+          .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
+        const paramValues = require('../core/getParamValues')(controls)
+        console.log('manual update paramValues', paramValues)
+        return {paramValues, origin: 'manualUpdate'}
       })
+      .multicast()
     /*sources.paramChanges.multicast().map(function (controls) {
       // FIXME: clunky
       try {
@@ -172,7 +176,8 @@ const makeActions = (sources) => {
               if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
               if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
             })
-            return {solids, paramValues: event.data.params, paramDefinitions: event.data.paramDefinitions}
+            const {paramValues, paramDefinitions} = event.data
+            return {solids, paramValues, paramDefinitions}
           }
         } catch (error) {
           return {error}

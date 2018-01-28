@@ -9,15 +9,16 @@ onmessage = function (event) {
       const {loadScript, requireUncached} = require('./core/scripLoading')
       requireUncached(mainPath)
       const {scriptRootModule, params, paramDefinitions} = loadScript(source, mainPath)
-      console.log('paramDefinitions', paramDefinitions)
       const paramValues = Object.assign({}, params, parameters)
+      console.log('paramDefinitions', paramDefinitions, 'paramValues', paramValues)
+
       let solids = toArray(scriptRootModule.main(paramValues))
         .map(function (object) {
           if (isCSG(object) || isCAG(object)) {
             return object.toCompactBinary()
           }
         })
-      self.postMessage({solids, params, paramDefinitions})
+      self.postMessage({solids, paramValues, paramDefinitions})
     }
   }
 }
