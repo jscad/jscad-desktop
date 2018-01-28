@@ -19,6 +19,7 @@ const initialState = {
     path: '',
     mainPath: '',
     script: '',
+    source: '',
     paramDefinitions: [],
     paramValues: {},
     previousParams: {},
@@ -121,32 +122,28 @@ function makeState (actions) {
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: ['new-entities']}})
       return Object.assign({}, state, {busy: true, viewer, design})
     },
-    setDesignContent: (state, mainScriptAsText) => {
+    setDesignContent: (state, source) => {
       console.log('setDesignContent')
-      const {mainPath} = state.design
       /*
         func(paramDefinitions) => paramsUI
         func(paramsUI + interaction) => params
       */
-      const {scriptRootModule, paramDefinitions, params} = loadScript(mainScriptAsText, mainPath)
-
-      const design = Object.assign({}, state.design, {
-        script: scriptRootModule,
-        paramDefinitions,
-        paramValues: params
-      })
-
-      console.log('done updating design from path')
-      // FIXME: UGHH so goddam verbose !
+      const design = Object.assign({}, state.design, {source})
       const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: [''], zoomToFitOn: ['new-entities']}})
       const appTitle = `jscad v ${packageMetadata.version}: ${state.design.name}`
       return Object.assign({}, state, {design, viewer}, {
         appTitle,
+        busy: true,
         error: undefined
       })
     },
-    setDesignSolids: (state, solids) => {
-      const design = Object.assign({}, state.design, {solids})
+    setDesignSolids: (state, {solids, paramDefinitions, paramValues}) => {
+      console.log('setDesignSolids')
+      const design = Object.assign({}, state.design, {
+        solids,
+        paramDefinitions,
+        paramValues
+      })
       const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
       const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
 
@@ -158,6 +155,7 @@ function makeState (actions) {
       }, exportInfos)
     },
     updateDesignFromParams: (state, {paramValues, origin, error}) => {
+      console.log('hereeee')
       if (error) { throw error }
       // disregard live updates if not enabled
       if (state.instantUpdate === false && origin === 'instantUpdate') {

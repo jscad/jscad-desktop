@@ -99,7 +99,6 @@ const makeActions = (sources) => {
 
   const exportRequested$ = sources.dom.select('#exportBtn').events('click')
     .sample(function (state, event) {
-      // console.log('state stuff', state, event)
       const defaultExportFilePath = state.exportFilePath
       return {defaultExportFilePath, exportFormat: state.exportFormat, data: state.design.solids}
     }, sources.state$)
@@ -148,8 +147,8 @@ const makeActions = (sources) => {
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
         return {paramValues: require('../core/getParamValues')(controls), origin: 'manualUpdate'}
-      }),
-    sources.paramChanges.multicast().map(function (controls) {
+      })
+    /*sources.paramChanges.multicast().map(function (controls) {
       // FIXME: clunky
       try {
         const paramValues = require('../core/getParamValues')(controls)
@@ -157,23 +156,26 @@ const makeActions = (sources) => {
       } catch (error) {
         return {error, origin: 'instantUpdate'}
       }
-    })
-      .tap(x => console.log('fdfd'))
+    }) */
+
   ])
-    .map(data => ({type: 'updateDesignFromParams', data}))
+    // .map(data => ({type: 'updateDesignFromParams', data}))
 
   const setDesignSolids$ = most.mergeArray([
     sources.solidWorker
       .filter(event => !('error' in event))
       .map(function (event) {
-        if (event.data instanceof Object) {
-          const { CAG, CSG } = require('@jscad/csg')
-          const solids = event.data.solids.map(function (object) {
-            if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
-            if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
-          })
-          console.log('solids', solids)
-          return solids
+        try {
+          if (event.data instanceof Object) {
+            const { CAG, CSG } = require('@jscad/csg')
+            const solids = event.data.solids.map(function (object) {
+              if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
+              if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
+            })
+            return {solids, paramValues: event.data.params, paramDefinitions: event.data.paramDefinitions}
+          }
+        } catch (error) {
+          return {error}
         }
       })
   ])

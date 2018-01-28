@@ -74,12 +74,24 @@ fsSink(
 )
 
 const most = require('most')
+const solidWorkerBase$ = most.mergeArray([
+  actions$.setDesignContent$.map(action => undefined),
+  actions$.updateDesignFromParams$.map(action => action.paramValues)
+]).multicast()
+
 solidWorker.sink(
-  most.mergeArray([
-    sources.fs.filter(data => data.operation === 'read').map(raw => raw.data),
-    sources.watcher.map(({filePath, contents}) => contents)
-  ])
-    .map(source => ({cmd: 'render', options: {mainPath: ''}, source}))
+    most.sample(function (params, design) {
+      console.log('foooo')
+      return {source: design.source, mainPath: design.mainPath, parameters: params}
+    },
+    solidWorkerBase$,
+    solidWorkerBase$,
+    state$
+      .filter(state => state.design.mainPath !== '')
+      .map(state => state.design)
+      .skipRepeats()
+  )
+    .map(({source, mainPath, parameters}) => ({cmd: 'render', source, mainPath, parameters}))
 )
 
 // viewer data
