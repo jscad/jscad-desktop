@@ -1,11 +1,41 @@
 // getParamDefinitions(script)
-const createParamControls = (targetEl, prevParamValues = {}, paramDefinitions, rebuildSolid) => {
-  targetEl.innerHTML = ''
-  let paramControls = []
+const html = require('bel')
 
-  for (let i = 0; i < paramDefinitions.length; i++) {
-    let paramdef = paramDefinitions[i]
-    paramdef.index = i + 1
+const createParamControls = (prevParamValues = {}, paramDefinitions, instantUpdate, rebuildSolid) => {
+  let paramControls = []
+  let results = []
+
+  const controls = paramDefinitions.map(function (paramDefinition) {
+    let type = paramDefinition.type.toLowerCase()
+    let control
+    console.log('type', type)
+    switch (type) {
+      case 'choice':
+        control = createChoiceControl(paramDefinition, prevParamValues[paramDefinition.name])
+        break
+      case 'group':
+        // control = createGroupControl(paramDefinition)
+        break
+      default:
+        console.log('other')
+        control = createControl(paramDefinition, prevParamValues[paramDefinition.name])
+        break
+    }
+    let label = paramDefinition.name + ':'
+    let className = ''
+    if ('caption' in paramDefinition) {
+      label = paramDefinition.caption
+      className = 'caption'
+    }
+    return html`<tr>
+      <td class=${className} > ${label}</td>
+      <td>${control}</td>
+    </tr>`
+  })
+
+  return {controls}
+
+  /* for (let i = 0; i < paramDefinitions.length; i++) {
 
     let control = null
     let type = paramdef.type.toLowerCase()
@@ -36,7 +66,7 @@ const createParamControls = (targetEl, prevParamValues = {}, paramDefinitions, r
         if (l !== null && l.nodeName === 'LABEL') {
           l.innerHTML = e.currentTarget.value
         }
-        if (document.getElementById('instantUpdate').checked === true) {
+        if (instantUpdate === true && rebuildSolid) {
           rebuildSolid(paramControls)
         }
       }
@@ -57,9 +87,10 @@ const createParamControls = (targetEl, prevParamValues = {}, paramDefinitions, r
       }
       tr.appendChild(td)
     }
-    targetEl.appendChild(tr)
+
+    results.push(tr)
   }
-  return paramControls
+  return {controls: results, paramControls} */
 }
 
 const createGroupControl = definition => {
@@ -79,9 +110,21 @@ const createChoiceControl = (definition, prevValue) => {
   if (!('values' in definition)) {
     throw new Error('Definition of choice parameter (' + definition.name + ") should include a 'values' parameter")
   }
-  let control = document.createElement('select')
+  console.log('choice', definition, prevValue)
+  const options = definition.captions.map(function (caption, index) {
+    const value = definition.values[index]
+    const selected = prevValue !== undefined ? prevValue === value : index === 0
+    return html`<option value=${value} selected=${selected}>
+      ${caption}
+    </option>`
+  })
+  let control = html`<select>
+    ${options}
+  </select` // document.createElement('select')
   control.paramName = definition.name
   control.paramType = definition.type
+
+  return control
   let values = definition.values
   let captions
   if ('captions' in definition) {
@@ -92,6 +135,7 @@ const createChoiceControl = (definition, prevValue) => {
   } else {
     captions = values
   }
+
   let selectedindex = 0
   for (let valueindex = 0; valueindex < values.length; valueindex++) {
     let option = document.createElement('option')
@@ -119,6 +163,7 @@ const createChoiceControl = (definition, prevValue) => {
 }
 
 const createControl = (definition, prevValue) => {
+  // console.log('definition', definition)
   let controlList = [
     {type: 'text', control: 'text', required: ['index', 'type', 'name'], initial: ''},
     {type: 'int', control: 'number', required: ['index', 'type', 'name'], initial: 0},
@@ -135,9 +180,41 @@ const createControl = (definition, prevValue) => {
   ]
   // check for required parameters
   if (!('type' in definition)) {
-    throw new Error('Parameter definition (' + definition.index + ") must include a 'type' parameter")
+    throw new Error('Parameter definition (' + definition + ") must include a 'type' parameter")
   }
-  let control = document.createElement('input')
+  let typeData = controlList.filter(x => definition.type === x.type)
+  typeData = (typeData && typeData.length > 0) ? typeData[0] : undefined
+  if (!typeData) {
+    throw new Error('Parameter definition (' + definition + ') is not known')
+  }
+
+  let controlValue
+  if (prevValue !== undefined) {
+    controlValue = prevValue
+  } else if ('initial' in definition) {
+    controlValue = definition.initial
+  } else if ('default' in definition) {
+    controlValue = definition.default
+  } else {
+    controlValue = typeData.initial
+  }
+  let control = html`<input 
+    type=${typeData.control} value=${controlValue} ${definition.checked ? 'checked=' : ''}> 
+  </input>`
+  control.paramName = definition.name
+  control.paramType = definition.type
+  // set generic HTML attributes
+  for (let property in definition) {
+    if (definition.hasOwnProperty(property)) {
+      if (typeData.required.indexOf(property) < 0) {
+        control.setAttribute(property, definition[property])
+      }
+    }
+  }
+
+  return control
+
+  control = document.createElement('input')
   let i, j, controlInstance, paramName
   for (i = 0; i < controlList.length; i++) {
     controlInstance = controlList[i]
@@ -153,14 +230,14 @@ const createControl = (definition, prevValue) => {
             control.setAttribute(paramName, definition[paramName])
           }
         } else {
-          throw new Error('Parameter definition (' + definition.index + ") must include a '" + paramName + "' parameter")
+          throw new Error('Parameter definition (' + definition + ") must include a '" + paramName + "' parameter")
         }
       }
       break
     }
   }
   if (i === controlList.length) {
-    throw new Error('Parameter definition (' + definition.index + ") is not a valid 'type'")
+    throw new Error('Parameter definition (' + definition + ") is not a valid 'type'")
   }
   // set the control type
   control.setAttribute('type', controlInstance.control)
