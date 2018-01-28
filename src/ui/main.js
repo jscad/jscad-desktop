@@ -1,5 +1,5 @@
 const html = require('bel')
-const {createParamControls} = require('./createParameterControls2')
+const {createParamControls} = require('./createParameterControls3')
 
 function dom (state, paramsCallbacktoStream) {
   const formatsList = state.availableExportFormats

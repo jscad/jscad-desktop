@@ -8,7 +8,7 @@ const createParamControls = (prevParamValues = {}, paramDefinitions, instantUpda
   const controls = paramDefinitions.map(function (paramDefinition) {
     let type = paramDefinition.type.toLowerCase()
     let control
-    console.log('type', type)
+    // console.log('type', type)
     switch (type) {
       case 'choice':
         control = createChoiceControl(paramDefinition, prevParamValues[paramDefinition.name])
@@ -17,7 +17,7 @@ const createParamControls = (prevParamValues = {}, paramDefinitions, instantUpda
         // control = createGroupControl(paramDefinition)
         break
       default:
-        console.log('other')
+        // console.log('other')
         control = createControl(paramDefinition, prevParamValues[paramDefinition.name])
         break
     }
@@ -27,6 +27,17 @@ const createParamControls = (prevParamValues = {}, paramDefinitions, instantUpda
       label = paramDefinition.caption
       className = 'caption'
     }
+
+    control.onchange = function (e) {
+      let l = e.currentTarget.nextElementSibling
+      if (l !== null && l.nodeName === 'LABEL') {
+        l.innerHTML = e.currentTarget.value
+      }
+      if (instantUpdate === true && rebuildSolid) {
+        rebuildSolid(paramControls)
+      }
+    }
+
     return html`<tr>
       <td class=${className} > ${label}</td>
       <td>${control}</td>
