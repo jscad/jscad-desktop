@@ -148,19 +148,20 @@ const makeActions = (sources) => {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
         const paramValues = require('../core/getParamValues')(controls)
-        console.log('manual update paramValues', paramValues)
         return {paramValues, origin: 'manualUpdate'}
       })
-      .multicast()
-    /*sources.paramChanges.multicast().map(function (controls) {
+      .multicast(),
+    sources.paramChanges.multicast().map(function (_controls) {
       // FIXME: clunky
       try {
+        const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
+          .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
         const paramValues = require('../core/getParamValues')(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
         return {error, origin: 'instantUpdate'}
       }
-    }) */
+    })
 
   ])
     // .map(data => ({type: 'updateDesignFromParams', data}))

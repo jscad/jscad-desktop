@@ -75,23 +75,32 @@ fsSink(
 
 const most = require('most')
 const solidWorkerBase$ = most.mergeArray([
-  actions$.setDesignContent$.map(action => undefined),
-  actions$.updateDesignFromParams$.map(action => action.paramValues)
+  actions$.setDesignContent$.map(action => ({paramValues: undefined, origin: 'designContent', error: undefined})),
+  actions$.updateDesignFromParams$
 ]).multicast()
 
 solidWorker.sink(
-    most.sample(function (params, design) {
-      console.log('foooo')
-      return {source: design.source, mainPath: design.mainPath, parameters: params}
+    most.sample(function ({origin, paramValues, error}, {design, instantUpdate}) {
+      console.log('fooo', origin, paramValues)
+      if (error) {
+        return undefined
+      }
+      const enforceParamDefinitions = require('./core/enforceParamDefinitions')
+      paramValues = paramValues ? enforceParamDefinitions(paramValues, design.paramDefinitions) : paramValues
+      if (!instantUpdate && origin === 'instantUpdate') {
+        return undefined
+      }
+      console.log('sending paramValues', paramValues)
+      return {source: design.source, mainPath: design.mainPath, paramValues}
     },
     solidWorkerBase$,
     solidWorkerBase$,
     state$
       .filter(state => state.design.mainPath !== '')
-      .map(state => state.design)
       .skipRepeats()
   )
-    .map(({source, mainPath, parameters}) => ({cmd: 'render', source, mainPath, parameters}))
+    .filter(x => x !== undefined)
+    .map(({source, mainPath, paramValues}) => ({cmd: 'render', source, mainPath, parameters: paramValues}))
 )
 
 // viewer data
