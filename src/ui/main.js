@@ -8,7 +8,7 @@ function dom (state, paramsCallbacktoStream) {
     })
 
   const {paramValues, paramDefinitions} = state.design
-  const {controls} = createParamControls(paramValues, paramDefinitions, true, paramsCallbacktoStream.callback)
+  const {controls} = createParamControls(paramValues, paramDefinitions, paramsCallbacktoStream.callback)
 
   const statusMessage = state.error !== undefined
     ? `Error: ${state.error.message} details:  ${state.error.stack}` : ''
