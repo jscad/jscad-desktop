@@ -1,5 +1,6 @@
 onmessage = function (event) {
   if (event.data instanceof Object) {
+    console.log('in web worker')
     const {data} = event
     if (data.cmd === 'render') {
       const {source, parameters, mainPath, options} = data
@@ -7,10 +8,12 @@ onmessage = function (event) {
       const {toArray} = require('./utils')
 
       const {loadScript, requireUncached} = require('./core/scripLoading')
+      // TODO: only uncache when needed
       requireUncached(mainPath)
       const {scriptRootModule, params, paramDefinitions} = loadScript(source, mainPath)
-      const paramValues = Object.assign({}, params, parameters)
-      console.log('paramDefinitions', paramDefinitions, 'paramValues', paramValues)
+      const paramDefaults = params
+      const paramValues = Object.assign({}, paramDefaults, parameters)
+      // console.log('paramDefinitions', paramDefinitions, 'paramValues', paramValues)
 
       let solids = toArray(scriptRootModule.main(paramValues))
         .map(function (object) {
@@ -18,7 +21,7 @@ onmessage = function (event) {
             return object.toCompactBinary()
           }
         })
-      self.postMessage({solids, paramValues, paramDefinitions})
+      self.postMessage({solids, paramDefaults, paramValues, paramDefinitions})
     }
   }
 }
