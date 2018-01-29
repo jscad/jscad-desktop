@@ -147,7 +147,7 @@ const makeActions = (sources) => {
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('../core/getParamValues')(controls)
+        const paramValues = require('../core/getParameterValues')(controls)
         return {paramValues, origin: 'manualUpdate'}
       })
       .multicast(),
@@ -156,7 +156,7 @@ const makeActions = (sources) => {
       try {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('../core/getParamValues')(controls)
+        const paramValues = require('../core/getParameterValues')(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
         return {error, origin: 'instantUpdate'}
@@ -177,8 +177,8 @@ const makeActions = (sources) => {
               if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
               if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
             })
-            const {paramValues, paramDefinitions} = event.data
-            return {solids, paramValues, paramDefinitions}
+            const {paramDefaults, paramValues, paramDefinitions} = event.data
+            return {solids, paramDefaults, paramValues, paramDefinitions}
           }
         } catch (error) {
           return {error}
