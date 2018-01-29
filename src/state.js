@@ -22,6 +22,7 @@ const initialState = {
     source: '',
     paramDefinitions: [],
     paramValues: {},
+    paramDefaults: {},
     previousParams: {},
     solids: [],
     // list of all paths of require() calls + main
@@ -137,12 +138,13 @@ function makeState (actions) {
         error: undefined
       })
     },
-    setDesignSolids: (state, {solids, paramDefinitions, paramValues}) => {
+    setDesignSolids: (state, {solids, paramDefaults, paramValues, paramDefinitions}) => {
       console.log('setDesignSolids')
       const design = Object.assign({}, state.design, {
         solids,
-        paramDefinitions,
-        paramValues
+        paramDefaults,
+        paramValues,
+        paramDefinitions
       })
       const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
       const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
