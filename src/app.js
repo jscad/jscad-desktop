@@ -14,7 +14,7 @@ const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
 const {domSink, domSource} = require('./sideEffects/dom')
 const paramsCallbacktoStream = require('./observable-utils/callbackToObservable')()
 const makeWorkerEffect = require('./sideEffects/worker')
-const solidWorker = makeWorkerEffect(new Worker('src/worker.js'))
+const solidWorker = makeWorkerEffect('src/worker.js')
 
 // proxy state stream to be able to access & manipulate it before it is actually available
 const { attach, stream } = proxy()
@@ -81,12 +81,12 @@ const solidWorkerBase$ = most.mergeArray([
 
 solidWorker.sink(
     most.sample(function ({origin, paramValues, error}, {design, instantUpdate}) {
-      console.log('fooo', origin, paramValues)
       if (error) {
         return undefined
       }
-      const enforceParamDefinitions = require('./core/enforceParamDefinitions')
-      paramValues = paramValues ? enforceParamDefinitions(paramValues, design.paramDefinitions) : paramValues
+      const applyParameterDefinitions = require('./core/applyParameterDefinitions')
+      paramValues = paramValues || design.paramValues // this ensures the last, manually modified params have upper hand
+      paramValues = paramValues ? applyParameterDefinitions(paramValues, design.paramDefinitions) : paramValues
       if (!instantUpdate && origin === 'instantUpdate') {
         return undefined
       }
