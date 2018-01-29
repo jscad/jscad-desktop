@@ -7,14 +7,17 @@
  * @param {Array} parameterDefinitions
  * @returns {Object} the parameter values, as an object
  */
-module.exports = function enforceParamDefinitions (rawParameters, parameterDefinitions) {
-  let paramValues = {}
-  Object.keys(rawParameters).forEach(paramName => {
+module.exports = function applyParameterDefinitions (rawParameters, parameterDefinitions, throwOnNoDefinition = false) {
+  // let paramValues = {}
+  return Object.keys(rawParameters).reduce((paramValues, paramName) => {
     let value = rawParameters[paramName]
     let definition = parameterDefinitions.filter(definition => definition.name === paramName)
     definition = definition.length > 0 ? definition[0] : undefined
     if (definition === undefined) {
-      throw new Error(`Parameter (${paramName}) has no matching definition`)
+      if (throwOnNoDefinition) {
+        throw new Error(`Parameter (${paramName}) has no matching definition`)
+      }
+      return paramValues
     }
     switch (definition.type) {
       case 'choice':
@@ -53,8 +56,8 @@ module.exports = function enforceParamDefinitions (rawParameters, parameterDefin
         break
     }
     paramValues[paramName] = value
-  })
-  return paramValues
+    return paramValues
+  }, {})
 }
 
 function isNumber (value) {
