@@ -21,7 +21,10 @@ function createWindow () {
     width: 1200,
     height: 700,
     webgl: true,
-    offscreen: true
+    offscreen: true,
+    webPreferences: {
+      nodeIntegrationInWorker: true
+    }
   }
   mainWindow = new BrowserWindow(options)
 
