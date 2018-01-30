@@ -79,7 +79,6 @@ electron.ipcMain.on('get-file-data', function (event) {
   event.sender.send('asynchronous-reply', {data, event, args: process.argv})
   event.returnValue = data
 })
-console.log('foo')
 
 electron.ipcMain.on('asynchronous-message', (event, arg) => {
   console.log(arg)  // prints "ping"
