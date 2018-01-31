@@ -43,6 +43,13 @@ module.exports = function applyParameterDefinitions (rawParameters, parameterDef
       case 'radio':
         value = valueForChoices(value, definition)
         break
+      case 'slider':
+        if (!isNaN(parseFloat(value)) && isFinite(value)) {
+          value = parseFloat(value)
+        } else {
+          throw new Error('Parameter (' + paramName + ') is not a valid number (' + value + ')')
+        }
+        break
     }
     paramValues[paramName] = value
     return paramValues
