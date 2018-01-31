@@ -161,6 +161,14 @@ const createControl = (definition, prevValue) => {
     throw new Error('Parameter definition (' + definition + ') is not known')
   }
 
+  // validate fields
+  const definitionFields = Object.keys(definition)
+  typeData.required.forEach(function (requiredField) {
+    if (!definitionFields.includes(requiredField)) {
+      throw new Error(`Parameter definition for "${definition.name}" must include a "${requiredField}" parameter`)
+    }
+  })
+
   // determine initial value of control
   let controlValue
   if (prevValue !== undefined) {
