@@ -1,5 +1,6 @@
 const path = require('path')
-const getParameterDefinitionsCLI = require('./parameters/getParameterDefinitionsCLI')
+const getParameterDefinitionsCLI = require('../parameters/getParameterDefinitionsCLI')
+const requireFromString = require('./requireFromString')
 
 const doesModuleExportParameterDefiniitions = moduleToCheck => {
   return moduleToCheck && 'getParameterDefinitions' in moduleToCheck

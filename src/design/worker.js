@@ -7,7 +7,7 @@ onmessage = function (event) {
       const {isCAG, isCSG} = require('@jscad/csg')
       const {toArray} = require('../utils/utils')
 
-      const {loadScript} = require('./scripLoading')
+      const {loadScript} = require('./code-loading/scriptLoading')
       const requireUncached = require('./code-loading/requireUncached')
       // TODO: only uncache when needed
       requireUncached(mainPath)

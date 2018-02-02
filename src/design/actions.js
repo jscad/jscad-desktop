@@ -37,7 +37,7 @@ const actions = (sources) => {
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('../core/getParameterValues')(controls)
+        const paramValues = require('./parameters/getParameterValues')(controls)
         return {paramValues, origin: 'manualUpdate'}
       })
       .multicast(),
@@ -46,7 +46,7 @@ const actions = (sources) => {
       try {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('../core/getParameterValues')(controls)
+        const paramValues = require('./parameters/getParameterValues')(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
         return {error, origin: 'instantUpdate'}
