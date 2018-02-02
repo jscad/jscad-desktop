@@ -1,5 +1,6 @@
 
-const {getScriptFile, getDesignName} = require('../core/scripLoading')
+const path = require('path')
+const {getScriptFile, getDesignName} = require('./designUtils')
 const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('./exportUtils')
 const packageMetadata = require('../../package.json')
 
@@ -24,7 +25,6 @@ const setDesignPath = (state, paths) => {
   console.log('setDesignPath')
   const mainPath = getScriptFile(paths)
   const filePath = paths[0]
-  const path = require('path')
   const designName = getDesignName(paths)
   const designPath = path.dirname(filePath)
 

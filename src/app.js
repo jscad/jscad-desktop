@@ -30,7 +30,9 @@ const sources = {
   dom: domSource(),
   solidWorker: solidWorker.source()
 }
-const actions$ = require('./actions/actions')(sources)
+const designActions = require('./design/actions')(sources)
+const otherActions = require('./actions/actions')(sources)
+const actions$ = Object.assign({}, designActions, otherActions)
 
 attach(makeState(Object.values(actions$)))
 

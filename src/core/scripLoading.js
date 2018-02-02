@@ -53,74 +53,6 @@ const doesModuleExportParameterDefiniitions = moduleToCheck => {
   return moduleToCheck && 'getParameterDefinitions' in moduleToCheck
 }
 
-const nameFromDir = (dirName, filePath) => {
-  const packageFile = path.join(dirName, 'package.json')
-  if (fs.existsSync(packageFile)) {
-    const name = require(packageFile).name
-    if (name) {
-      return name
-    }
-  }
-  return filePath ? path.parse(path.basename(filePath)).name : path.basename(dirName)
-}
-
-const getDesignName = paths => {
-  if (!paths) {
-    return
-  }
-  let mainPath = paths[0]
-  const stats = fs.statSync(mainPath)
-  if (stats.isFile()) {
-    const dirName = path.dirname(mainPath)
-    return nameFromDir(dirName, mainPath)
-  } else if (stats.isDirectory()) {
-    // try to use package.json to find main
-    return nameFromDir(mainPath)
-  }
-}
-
-/** get main entry point of a script
- * @param  {} !paths
- */
-const getScriptFile = paths => {
-  if (!paths) {
-    return
-  }
-  let mainPath = paths[0]
-  let filePath
-  const stats = fs.statSync(mainPath)
-  if (stats.isFile()) {
-    return mainPath
-  } else if (stats.isDirectory()) {
-    // console.log('found dir')
-    // first try to use package.json to find main
-    const packageFile = path.join(mainPath, 'package.json')
-    if (fs.existsSync(packageFile)) {
-      const rMain = require(packageFile).main
-      if (rMain) {
-        return path.join(mainPath, rMain)
-      }
-      // filePath = rMain ? path.join(mainPath, rMain) : undefined
-    }
-
-    // if all else fails try to look for index.js/jscad, main.js/jscad or a file with same name
-    // as the folder
-    const entries = fs.readdirSync(mainPath)
-    const acceptableMainFiles = ['main', 'index', path.parse(path.basename(mainPath)).name]
-    const jsMainFiles = acceptableMainFiles.map(x => x + '.js')
-    const jscadMainFiles = acceptableMainFiles.map(x => x + '.jscad')
-
-    const candidates = entries
-      .filter(entry => {
-        return jsMainFiles.concat(jscadMainFiles).includes(entry)
-      })
-    if (candidates.length > 0) {
-      filePath = path.join(mainPath, candidates[0])
-    }
-    return filePath
-  }
-}
-
 /** load a jscad script, injecting the basic dependencies if necessary
  * @param  {} filePath
  * @param  {} csgBasePath='../../../../core/tmp/csg.js : relative path or  '@jscad/csg'
@@ -170,13 +102,4 @@ function loadScript (scriptAsText, filePath, csgBasePath = '@jscad/csg/api') {
   return {params, paramDefinitions, scriptRootModule: scriptRootModule}
 }
 
-function watchScript (filePath, callback) {
-  fs.watch(filePath, { encoding: 'utf8' }, (eventType, filename) => {
-    if (filename) {
-      requireUncached(filePath)
-      callback(filePath)
-    }
-  })
-}
-
-module.exports = {loadScript, requireUncached, watchScript, getScriptFile, requireFromString, getDesignName}
+module.exports = {loadScript, requireUncached, requireFromString}
