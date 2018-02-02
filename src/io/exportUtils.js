@@ -1,5 +1,5 @@
 const path = require('path')
-const {head} = require('../utils')
+const {head} = require('../utils/utils')
 const {supportedFormatsForObjects, formats} = require('../io/formats')
 
 const availableExportFormatsFromSolids = (solids) => {

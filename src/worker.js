@@ -5,7 +5,7 @@ onmessage = function (event) {
     if (data.cmd === 'render') {
       const {source, parameters, mainPath, options} = data
       const {isCAG, isCSG} = require('@jscad/csg')
-      const {toArray} = require('./utils')
+      const {toArray} = require('./utils/utils')
 
       const {loadScript, requireUncached} = require('./core/scripLoading')
       // TODO: only uncache when needed

@@ -12,7 +12,7 @@ const dragAndDropSource$ = makeDragDropSource(document)
 const {watcherSink, watcherSource} = require('./sideEffects/fileWatcher')
 const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
 const {domSink, domSource} = require('./sideEffects/dom')
-const paramsCallbacktoStream = require('./observable-utils/callbackToObservable')()
+const paramsCallbacktoStream = require('./utils/observable-utils/callbackToObservable')()
 const makeWorkerEffect = require('./sideEffects/worker')
 const solidWorker = makeWorkerEffect('src/worker.js')
 
@@ -31,8 +31,9 @@ const sources = {
   solidWorker: solidWorker.source()
 }
 const designActions = require('./design/actions')(sources)
+const ioActions = require('./io/actions')(sources)
 const otherActions = require('./actions/actions')(sources)
-const actions$ = Object.assign({}, designActions, otherActions)
+const actions$ = Object.assign({}, designActions, otherActions, ioActions)
 
 attach(makeState(Object.values(actions$)))
 

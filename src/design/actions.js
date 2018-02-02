@@ -2,7 +2,7 @@ const most = require('most')
 const {remote} = require('electron')
 const {dialog} = remote
 
-const designActions = (sources) => {
+const actions = (sources) => {
   const designPath$ = most.mergeArray([
     sources.dom.select('#fileLoader').events('click')
       .map(function () {
@@ -91,4 +91,4 @@ const designActions = (sources) => {
   }
 }
 
-module.exports = designActions
+module.exports = actions

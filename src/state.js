@@ -1,6 +1,6 @@
 const {mergeArray} = require('most')
 const packageMetadata = require('../package.json')
-const {merge} = require('./utils')
+const {merge} = require('./utils/utils')
 
 // very nice color for the cuts [0, 0.6, 1] to go with the orange
 const themes = {
@@ -92,9 +92,6 @@ function makeState (actions) {
     toggleInstantUpdate: (state, instantUpdate) => {
       // console.log('toggleInstantUpdate', instantUpdate)
       return Object.assign({}, state, {instantUpdate})
-    },
-    changeExportFormat: (state, exportFormat) => {
-      return Object.assign({}, state, exportFilePathFromFormatAndDesign(state.design, exportFormat))
     },
     clearErrors: (state, _) => {
       console.log('clear errors')

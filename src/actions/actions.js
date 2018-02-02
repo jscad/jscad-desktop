@@ -1,9 +1,5 @@
-const path = require('path')
 const most = require('most')
-const {remote} = require('electron')
-const {dialog} = remote
-const {getScriptFile} = require('../core/scripLoading')
-const {head} = require('../utils')
+const {head} = require('../utils/utils')
 
 function compositeKeyFromKeyEvent (event) {
   const ctrl = event.ctrlKey ? 'ctrl+' : ''
@@ -93,26 +89,6 @@ const makeActions = (sources) => {
   ])
     .map(data => ({type: 'toggleInstantUpdate', data}))
 
-  const changeExportFormat$ = sources.dom.select('#exportFormats').events('change')
-    .map(e => e.target.value)
-    .map(data => ({type: 'changeExportFormat', data}))
-
-  const exportRequested$ = sources.dom.select('#exportBtn').events('click')
-    .sample(function (state, event) {
-      const defaultExportFilePath = state.exportFilePath
-      return {defaultExportFilePath, exportFormat: state.exportFormat, data: state.design.solids}
-    }, sources.state$)
-    .map(function ({defaultExportFilePath, exportFormat, data}) {
-      // console.log('exporting data to', defaultExportFilePath)
-      const filePath = dialog.showSaveDialog({properties: ['saveFile'], title: 'export design to', defaultPath: defaultExportFilePath})//, function (filePath) {
-      // console.log('saving', filePath)
-      if (filePath !== undefined) {
-        const saveDataToFs = require('../io/saveDataToFs')
-        saveDataToFs(data, exportFormat, filePath)
-      }
-    })
-    .map(data => ({type: 'exportRequested', data}))
-
   const setErrors$ = most.mergeArray([
     sources.solidWorker.filter(event => 'error' in event)
   ])
@@ -140,10 +116,7 @@ const makeActions = (sources) => {
     // ui
     changeTheme$,
     toggleAutoReload$,
-    toggleInstantUpdate$,
-    // exports
-    changeExportFormat$,
-    exportRequested$
+    toggleInstantUpdate$
   }
 }
 

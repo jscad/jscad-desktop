@@ -1,6 +1,6 @@
 const fs = require('fs')
 const {requireUncached} = require('../core/scripLoading')
-const callBackToStream = require('../observable-utils/callbackToObservable')
+const callBackToStream = require('../utils/observable-utils/callbackToObservable')
 
  // deal with all the dependencies
 const path = require('path')

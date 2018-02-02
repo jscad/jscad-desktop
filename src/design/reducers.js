@@ -1,7 +1,7 @@
 
 const path = require('path')
 const {getScriptFile, getDesignName} = require('./designUtils')
-const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('./exportUtils')
+const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('../io/exportUtils')
 const packageMetadata = require('../../package.json')
 
 const initialize = () => {
@@ -38,6 +38,7 @@ const setDesignPath = (state, paths) => {
   const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: ['new-entities']}})
   return Object.assign({}, state, {busy: true, viewer, design})
 }
+
 const setDesignContent = (state, source) => {
   console.log('setDesignContent')
   /*
@@ -74,7 +75,6 @@ const setDesignSolids = (state, {solids, paramDefaults, paramValues, paramDefini
 }
 
 const updateDesignFromParams = (state, {paramValues, origin, error}) => {
-  console.log('hereeee')
   /* if (error) { throw error }
   // disregard live updates if not enabled
   if (state.instantUpdate === false && origin === 'instantUpdate') {
@@ -87,6 +87,7 @@ const updateDesignFromParams = (state, {paramValues, origin, error}) => {
   const design = Object.assign({}, originalDesign, {solids, paramValues}) */
   return Object.assign({}, state, {busy: true})
 }
+
 const timeOutDesignGeneration = (state) => {
   const isBusy = state.busy
   if (isBusy) {
