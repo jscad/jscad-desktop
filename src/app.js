@@ -76,7 +76,7 @@ fsSink(
 const most = require('most')
 const solidWorkerBase$ = most.mergeArray([
   actions$.setDesignContent$.map(action => ({paramValues: undefined, origin: 'designContent', error: undefined})),
-  actions$.updateDesignFromParams$
+  actions$.updateDesignFromParams$.map(action => action.data)
 ]).multicast()
 
 solidWorker.sink(

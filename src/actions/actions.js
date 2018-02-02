@@ -164,7 +164,7 @@ const makeActions = (sources) => {
     })
 
   ])
-    // .map(data => ({type: 'updateDesignFromParams', data}))
+  .map(data => ({type: 'updateDesignFromParams', data})).multicast()
 
   const setDesignSolids$ = most.mergeArray([
     sources.solidWorker
@@ -202,7 +202,7 @@ const makeActions = (sources) => {
     // .forEach(x => console.log('clear errors', x))
 
   const timeOutDesignGeneration$ = designPath$
-    .delay(20000)
+    .delay(60000)
     .map(data => ({type: 'timeOutDesignGeneration', data}))
     .tap(x => console.log('timeOutDesignGeneration'))
 
