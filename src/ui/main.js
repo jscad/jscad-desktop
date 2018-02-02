@@ -13,8 +13,6 @@ function dom (state, paramsCallbacktoStream) {
   const statusMessage = state.error !== undefined
     ? `Error: ${state.error.message} details:  ${state.error.stack}` : ''
 
-  const exportButtonText = `export design to ${state.exportFormat}`
-
   const output = html`
     <div id='container' style='color:${state.mainTextColor}'>
       <header>
@@ -34,7 +32,7 @@ function dom (state, paramsCallbacktoStream) {
             <select id='exportFormats'>
             ${formatsList}
             </select>
-            <input type='button' value="${exportButtonText}" id="exportBtn"/>
+            <input type='button' value="export" id="exportBtn"/>
         </span>
           
         </section>
@@ -70,6 +68,27 @@ function dom (state, paramsCallbacktoStream) {
           <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
         </span>
       </span>
+
+      <!--Options-->
+      <section id='options'>
+        Options
+        NOT functional yet !!!
+        <table>
+          <tr>
+            <th>Timeout for solids generation</th>
+            <th><input type='number' min=0 max=200000 value=${state.solidsTimeOut}/></th>
+          </tr>
+          <tr>
+            <th>Zoom to fit</th>
+            <th><input type='checkbox' checked=false/></th>
+          </tr>
+          <tr>
+            <th>Storage path</th>
+            <th>${state.storage.path}</th>
+          </tr>
+        </table>
+        
+      </section>
 
       <canvas id='renderTarget'> </canvas>
       
