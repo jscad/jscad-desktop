@@ -1,14 +1,13 @@
 const {mergeArray} = require('most')
 const packageMetadata = require('../package.json')
 const {merge, toArray, head} = require('./utils')
-const {getScriptFile, loadScript} = require('./core/scripLoading')
+const {getScriptFile, getDesignName, loadScript} = require('./core/scripLoading')
 
 // very nice color for the cuts [0, 0.6, 1] to go with the orange
 const themes = {
   light: require('../data/theme.light'),
   dark: require('../data/theme.dark')
 }
-
 const initialState = {
   appTitle: `jscad v ${packageMetadata.version}`,
   // for possible errors
@@ -28,6 +27,7 @@ const initialState = {
     // list of all paths of require() calls + main
     modulePaths: []
   },
+  solidsTimeOut: 20000,
   // export
   exportFormat: '',
   exportFilePath: '', // default export file path
@@ -59,7 +59,12 @@ const initialState = {
     }
   },
   // UI
-  shortcuts: require('../data/keybindings.json')
+  shortcuts: require('../data/keybindings.json'),
+  // storage: this is not changeable, only for display
+  storage: {
+    path: require('electron').remote.app.getPath('userData')
+  }
+
 }
 
 function makeState (actions) {
@@ -110,7 +115,7 @@ function makeState (actions) {
       const mainPath = getScriptFile(paths)
       const filePath = paths[0]
       const path = require('path')
-      const designName = path.parse(path.basename(filePath)).name
+      const designName = getDesignName(paths)
       const designPath = path.dirname(filePath)
 
       const design = Object.assign({}, state.design, {
@@ -158,7 +163,7 @@ function makeState (actions) {
     },
     updateDesignFromParams: (state, {paramValues, origin, error}) => {
       console.log('hereeee')
-      if (error) { throw error }
+      /*if (error) { throw error }
       // disregard live updates if not enabled
       if (state.instantUpdate === false && origin === 'instantUpdate') {
         return state
@@ -167,8 +172,8 @@ function makeState (actions) {
       const {script} = originalDesign
 
       const solids = toArray(script.main(paramValues))
-      const design = Object.assign({}, originalDesign, {solids, paramValues})
-      return Object.assign({}, state, {design, error: undefined})
+      const design = Object.assign({}, originalDesign, {solids, paramValues}) */
+      return Object.assign({}, state, {busy: true})
     },
     timeOutDesignGeneration: (state) => {
       const isBusy = state.busy
