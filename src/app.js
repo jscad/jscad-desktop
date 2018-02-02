@@ -14,7 +14,7 @@ const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
 const {domSink, domSource} = require('./sideEffects/dom')
 const paramsCallbacktoStream = require('./utils/observable-utils/callbackToObservable')()
 const makeWorkerEffect = require('./sideEffects/worker')
-const solidWorker = makeWorkerEffect('src/worker.js')
+const solidWorker = makeWorkerEffect('src/design/worker.js')
 
 // proxy state stream to be able to access & manipulate it before it is actually available
 const { attach, stream } = proxy()
@@ -87,7 +87,7 @@ solidWorker.sink(
       if (error) {
         return undefined
       }
-      const applyParameterDefinitions = require('./core/applyParameterDefinitions')
+      const applyParameterDefinitions = require('./design/parameters/applyParameterDefinitions')
       paramValues = paramValues || design.paramValues // this ensures the last, manually modified params have upper hand
       paramValues = paramValues ? applyParameterDefinitions(paramValues, design.paramDefinitions) : paramValues
       if (!instantUpdate && origin === 'instantUpdate') {
