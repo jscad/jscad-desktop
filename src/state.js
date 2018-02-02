@@ -1,7 +1,6 @@
 const {mergeArray} = require('most')
 const packageMetadata = require('../package.json')
-const {merge, toArray, head} = require('./utils')
-const {getScriptFile, getDesignName, loadScript} = require('./core/scripLoading')
+const {merge} = require('./utils')
 
 // very nice color for the cuts [0, 0.6, 1] to go with the orange
 const themes = {
@@ -13,20 +12,7 @@ const initialState = {
   // for possible errors
   error: undefined,
   // design data
-  design: {
-    name: '',
-    path: '',
-    mainPath: '',
-    script: '',
-    source: '',
-    paramDefinitions: [],
-    paramValues: {},
-    paramDefaults: {},
-    previousParams: {},
-    solids: [],
-    // list of all paths of require() calls + main
-    modulePaths: []
-  },
+  design: require('./design/reducers').initialize(),
   solidsTimeOut: 20000,
   // export
   exportFormat: '',
@@ -70,7 +56,7 @@ const initialState = {
 function makeState (actions) {
   // const reducers = //Object.assign({}, dataParamsReducers, cameraControlsReducers)
   actions = mergeArray(actions)
-  const reducers = {
+  let reducers = {
     toggleAutorotate: (state, autoRotate) => {
       const controls = Object.assign({}, state.viewer.controls, {autoRotate: {enabled: autoRotate}})
       const viewer = Object.assign({}, state.viewer, {controls})
@@ -110,86 +96,14 @@ function makeState (actions) {
     changeExportFormat: (state, exportFormat) => {
       return Object.assign({}, state, exportFilePathFromFormatAndDesign(state.design, exportFormat))
     },
-    setDesignPath: (state, paths) => {
-      console.log('setDesignPath')
-      const mainPath = getScriptFile(paths)
-      const filePath = paths[0]
-      const path = require('path')
-      const designName = getDesignName(paths)
-      const designPath = path.dirname(filePath)
-
-      const design = Object.assign({}, state.design, {
-        name: designName,
-        path: designPath,
-        mainPath
-      })
-
-      // we want the viewer to focus on new entities for our 'session' (until design change)
-      const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: ['new-entities']}})
-      return Object.assign({}, state, {busy: true, viewer, design})
-    },
-    setDesignContent: (state, source) => {
-      console.log('setDesignContent')
-      /*
-        func(paramDefinitions) => paramsUI
-        func(paramsUI + interaction) => params
-      */
-      const design = Object.assign({}, state.design, {source})
-      const viewer = Object.assign({}, state.viewer, {behaviours: {resetViewOn: [''], zoomToFitOn: ['new-entities']}})
-      const appTitle = `jscad v ${packageMetadata.version}: ${state.design.name}`
-      return Object.assign({}, state, {design, viewer}, {
-        appTitle,
-        busy: true,
-        error: undefined
-      })
-    },
-    setDesignSolids: (state, {solids, paramDefaults, paramValues, paramDefinitions}) => {
-      console.log('setDesignSolids')
-      const design = Object.assign({}, state.design, {
-        solids,
-        paramDefaults,
-        paramValues,
-        paramDefinitions
-      })
-      const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
-      const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
-
-      return Object.assign({}, state, {
-        design,
-        busy: false,
-        availableExportFormats,
-        exportFormat
-      }, exportInfos)
-    },
-    updateDesignFromParams: (state, {paramValues, origin, error}) => {
-      console.log('hereeee')
-      /*if (error) { throw error }
-      // disregard live updates if not enabled
-      if (state.instantUpdate === false && origin === 'instantUpdate') {
-        return state
-      }
-      let originalDesign = state.design
-      const {script} = originalDesign
-
-      const solids = toArray(script.main(paramValues))
-      const design = Object.assign({}, originalDesign, {solids, paramValues}) */
-      return Object.assign({}, state, {busy: true})
-    },
-    timeOutDesignGeneration: (state) => {
-      const isBusy = state.busy
-      if (isBusy) {
-        return Object.assign({}, state, {
-          busy: false,
-          error: new Error('Failed to generate design within an acceptable time, bailing out')
-        })
-      }
-      return state
-    },
     clearErrors: (state, _) => {
       console.log('clear errors')
       return Object.assign({}, state, {error: undefined})
     }
   }
+
+  const designReducers = require('./design/reducers')
+  reducers = Object.assign({}, reducers, designReducers)
 
   const state$ = actions
     .scan(function (state, action) {
@@ -211,27 +125,3 @@ function makeState (actions) {
 }
 
 module.exports = {makeState, initialState}
-
-// state utilities , extract at some point
-const exportFilePathFromFormatAndDesign = (design, exportFormat) => {
-  const path = require('path')
-  const {formats} = require('./io/formats')
-
-  const extension = exportFormat ? formats[exportFormat].extension : ''
-  const defaultFileName = `${design.name}.${extension}`
-  const exportFilePath = path.join(design.path, defaultFileName)
-
-  return {exportFilePath}
-}
-
-const availableExportFormatsFromSolids = (solids) => {
-  const {supportedFormatsForObjects, formats} = require('./io/formats')
-  const formatsToIgnore = ['jscad', 'js']
-  const availableExportFormats = supportedFormatsForObjects(solids)
-    .filter(formatName => !formatsToIgnore.includes(formatName))
-    .map(function (formatName) {
-      return {name: formatName, displayName: formats[formatName].displayName}
-    })
-  let exportFormat = head(availableExportFormats) ? head(availableExportFormats).name : undefined
-  return {exportFormat, availableExportFormats}
-}
