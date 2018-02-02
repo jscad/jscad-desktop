@@ -53,6 +53,35 @@ const doesModuleExportParameterDefiniitions = moduleToCheck => {
   return moduleToCheck && 'getParameterDefinitions' in moduleToCheck
 }
 
+const nameFromDir = (dirName, filePath) => {
+  const packageFile = path.join(dirName, 'package.json')
+  if (fs.existsSync(packageFile)) {
+    const name = require(packageFile).name
+    if (name) {
+      return name
+    }
+  }
+  return filePath ? path.parse(path.basename(filePath)).name : path.basename(dirName)
+}
+
+const getDesignName = paths => {
+  if (!paths) {
+    return
+  }
+  let mainPath = paths[0]
+  const stats = fs.statSync(mainPath)
+  if (stats.isFile()) {
+    const dirName = path.dirname(mainPath)
+    return nameFromDir(dirName, mainPath)
+  } else if (stats.isDirectory()) {
+    // try to use package.json to find main
+    return nameFromDir(mainPath)
+  }
+}
+
+/** get main entry point of a script
+ * @param  {} !paths
+ */
 const getScriptFile = paths => {
   if (!paths) {
     return
@@ -150,4 +179,4 @@ function watchScript (filePath, callback) {
   })
 }
 
-module.exports = {loadScript, requireUncached, watchScript, getScriptFile, requireFromString}
+module.exports = {loadScript, requireUncached, watchScript, getScriptFile, requireFromString, getDesignName}
