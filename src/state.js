@@ -13,7 +13,6 @@ const initialState = {
   error: undefined,
   // design data
   design: require('./design/reducers').initialize(),
-  solidsTimeOut: 20000,
   // export
   exportFormat: '',
   exportFilePath: '', // default export file path
@@ -21,6 +20,7 @@ const initialState = {
   // status/toggles
   autoReload: true,
   instantUpdate: true,
+  solidsTimeOut: 20000,
   busy: false,
   // visuals
   themeName: 'light',
@@ -57,41 +57,12 @@ function makeState (actions) {
   // const reducers = //Object.assign({}, dataParamsReducers, cameraControlsReducers)
   actions = mergeArray(actions)
   let reducers = {
-    toggleAutorotate: (state, autoRotate) => {
-      const controls = Object.assign({}, state.viewer.controls, {autoRotate: {enabled: autoRotate}})
-      const viewer = Object.assign({}, state.viewer, {controls})
-      return Object.assign({}, state, {viewer})
-    },
-    toggleGrid: (state, show) => {
-      const grid = Object.assign({}, state.viewer.grid, {show})
-      const viewer = Object.assign({}, state.viewer, {grid})
-      return Object.assign({}, state, {viewer})
-    },
-    toggleAxes: (state, show) => {
-      const axes = Object.assign({}, state.viewer.axes, {show})
-      const viewer = Object.assign({}, state.viewer, {axes})
-      return Object.assign({}, state, {viewer})
-    },
-    toPresetView: (state, viewName) => {
-      const viewer = Object.assign({}, state.viewer, {camera: {position: viewName}})
-      return Object.assign({}, state, {viewer})
-    },
-    setProjectionType: (state, projectionType) => {
-      const viewer = Object.assign({}, state.viewer, {camera: {projectionType}})
-      return Object.assign({}, state, {viewer})
-    },
+    
     changeTheme: (state, themeName) => {
       const themeData = themes[themeName]
       // console.log('changeTheme', themeName, themeData)
       const viewer = merge({}, state.viewer, themeData.viewer)
       return Object.assign({}, state, {viewer, themeName, mainTextColor: themeData.mainTextColor})
-    },
-    toggleAutoReload: (state, autoReload) => {
-      return Object.assign({}, state, {autoReload})
-    },
-    toggleInstantUpdate: (state, instantUpdate) => {
-      // console.log('toggleInstantUpdate', instantUpdate)
-      return Object.assign({}, state, {instantUpdate})
     },
     clearErrors: (state, _) => {
       console.log('clear errors')
@@ -100,7 +71,8 @@ function makeState (actions) {
   }
 
   const designReducers = require('./design/reducers')
-  reducers = Object.assign({}, reducers, designReducers)
+  const ioReducers = require('./io/reducers')
+  reducers = Object.assign({}, reducers, designReducers, ioReducers)
 
   const state$ = actions
     .scan(function (state, action) {

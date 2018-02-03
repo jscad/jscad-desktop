@@ -32,8 +32,9 @@ const sources = {
 }
 const designActions = require('./design/actions')(sources)
 const ioActions = require('./io/actions')(sources)
+const viewerActions = require('./viewer/actions')(sources)
 const otherActions = require('./actions/actions')(sources)
-const actions$ = Object.assign({}, designActions, otherActions, ioActions)
+const actions$ = Object.assign({}, designActions, otherActions, ioActions, viewerActions)
 
 attach(makeState(Object.values(actions$)))
 
@@ -116,12 +117,7 @@ state$
     JSON.stringify(state.design.solids) === JSON.stringify(previousState.design.solids)
     return sameSolids
   })
-  /* .skipRepeatsWith((a, b) => {
-    // console.log('FOObar', a, b)
-    return a.design.mainPath === b.design.mainPath //&& b.design.solids
-  }) */
   .forEach(state => {
-    // console.log('changing solids')
     if (csgViewer !== undefined) {
       csgViewer(undefined, {solids: state.design.solids})
     }
@@ -152,18 +148,27 @@ const outToDom$ = state$
 domSink(outToDom$)
 
 // for viewer
+
+/*viewerActions
+  .toggleGrid$
+  .forEach(params => {
+    console.log('changing viewer params', params)
+    const viewerElement = document.getElementById('renderTarget')
+    setCanvasSize(viewerElement)
+    // initialize viewer if it has not been done already
+    if (viewerElement && !csgViewer) {
+      const csgViewerItems = makeCsgViewer(viewerElement, params)
+      csgViewer = csgViewerItems.csgViewer
+    }
+    if (csgViewer) {
+      csgViewer(params)
+    }
+  })*/
 state$
   .map(state => state.viewer)
   .skipRepeatsWith(function (state, previousState) {
     return JSON.parse(JSON.stringify(state)) === JSON.parse(JSON.stringify(previousState))
   })
-  /* require('most').mergeArray(
-  [
-    actions$.toggleGrid$.map(x => ({grid: {show: x.data}})),
-    // actions$.toggleAutorotate$,
-    // actions$.changeTheme$.map(x=>x)
-  ]
-  ) */
   .forEach(params => {
     // console.log('changing viewer params')
     const viewerElement = document.getElementById('renderTarget')

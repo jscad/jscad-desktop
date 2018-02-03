@@ -82,12 +82,31 @@ const actions = (sources) => {
     .map(data => ({type: 'timeOutDesignGeneration', data}))
     .tap(x => console.log('timeOutDesignGeneration'))
 
+  // ui/toggles
+  const toggleAutoReload$ = most.mergeArray([
+    sources.dom.select('#autoReload').events('click')
+      .map(e => e.target.checked),
+    sources.store
+      .map(data => data.autoReload)
+  ])
+  .map(data => ({type: 'toggleAutoReload', data}))
+
+  const toggleInstantUpdate$ = most.mergeArray([
+    sources.dom.select('#instantUpdate').events('click').map(event => event.target.checked),
+    sources.store.map(data => data.instantUpdate)
+  ])
+    .map(data => ({type: 'toggleInstantUpdate', data}))
+
   return {
     setDesignPath$,
     setDesignContent$,
     updateDesignFromParams$,
     timeOutDesignGeneration$,
-    setDesignSolids$
+    setDesignSolids$,
+
+    // ui
+    toggleAutoReload$,
+    toggleInstantUpdate$
   }
 }
 

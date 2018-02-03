@@ -46,27 +46,6 @@ const makeActions = (sources) => {
   }, keyDowns$, keyDowns$, sources.state$)
     .filter(x => x !== undefined)
 
-  const toggleGrid$ = most.mergeArray([
-    sources.dom.select('#grid').events('click')
-      .map(e => e.target.checked),
-    sources.store.map(data => data.viewer.grid.show)
-  ])
-    .map(data => ({type: 'toggleGrid', data}))
-
-  const toggleAxes$ = most.mergeArray([
-    sources.dom.select('#toggleAxes').events('click')
-      .map(e => e.target.checked)
-    // sources.store.map(data => data.viewer.grid.show)
-  ])
-    .map(data => ({type: 'toggleAxes', data}))
-
-  const toggleAutorotate$ = most.mergeArray([
-    sources.dom.select('#autoRotate').events('click')
-    .map(e => e.target.checked)
-      // sources.store.map(data => data.viewer.grid.show)
-  ])
-    .map(data => ({type: 'toggleAutorotate', data}))
-
   const changeTheme$ = most.mergeArray([
     sources.dom.select('#themeSwitcher').events('change')
       .map(e => e.target.value),
@@ -75,20 +54,6 @@ const makeActions = (sources) => {
   .map(data => ({type: 'changeTheme', data}))
 
   // non visual related actions
-  const toggleAutoReload$ = most.mergeArray([
-    sources.dom.select('#autoReload').events('click')
-      .map(e => e.target.checked),
-    sources.store
-      .map(data => data.autoReload)
-  ])
-  .map(data => ({type: 'toggleAutoReload', data}))
-
-  const toggleInstantUpdate$ = most.mergeArray([
-    sources.dom.select('#instantUpdate').events('click').map(event => event.target.checked),
-    sources.store.map(data => data.instantUpdate)
-  ])
-    .map(data => ({type: 'toggleInstantUpdate', data}))
-
   const setErrors$ = most.mergeArray([
     sources.solidWorker.filter(event => 'error' in event)
   ])
@@ -109,14 +74,8 @@ const makeActions = (sources) => {
     // generic clear error action
     clearErrors$,
     setErrors$,
-    // 3d viewer
-    toggleGrid$,
-    toggleAxes$,
-    toggleAutorotate$,
     // ui
-    changeTheme$,
-    toggleAutoReload$,
-    toggleInstantUpdate$
+    changeTheme$
   }
 }
 

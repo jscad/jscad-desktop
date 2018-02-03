@@ -99,11 +99,24 @@ const timeOutDesignGeneration = (state) => {
   return state
 }
 
+// ui/toggles
+const toggleAutoReload = (state, autoReload) => {
+  return Object.assign({}, state, {autoReload})
+}
+const toggleInstantUpdate = (state, instantUpdate) => {
+  // console.log('toggleInstantUpdate', instantUpdate)
+  return Object.assign({}, state, {instantUpdate})
+}
+
 module.exports = {
   initialize,
   setDesignPath,
   setDesignContent,
   setDesignSolids,
   updateDesignFromParams,
-  timeOutDesignGeneration
+  timeOutDesignGeneration,
+
+  // ui/toggles
+  toggleAutoReload,
+  toggleInstantUpdate
 }
