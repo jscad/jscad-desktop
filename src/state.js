@@ -25,25 +25,7 @@ const initialState = {
   // visuals
   themeName: 'light',
   mainTextColor: '#FFF',
-  viewer: {// ridiculous shadowing of viewer state ?? or actually logical
-    // camera: {position: [150, 150, 250]},
-    rendering: {
-      background: [0.211, 0.2, 0.207, 1], // [1, 1, 1, 1],//54, 51, 53
-      meshColor: [0.4, 0.6, 0.5, 1] // nice orange : [1, 0.4, 0, 1]
-    },
-    grid: {
-      show: false,
-      color: [1, 1, 1, 0.1]
-    },
-    axes: {
-      show: true
-    },
-    smoothNormals: true,
-    // UGH
-    behaviours: {
-      resetViewOn: []
-    }
-  },
+  viewer: require('./viewer/reducers').initialize(),
   // UI
   shortcuts: require('../data/keybindings.json'),
   // storage: this is not changeable, only for display
@@ -57,7 +39,6 @@ function makeState (actions) {
   // const reducers = //Object.assign({}, dataParamsReducers, cameraControlsReducers)
   actions = mergeArray(actions)
   let reducers = {
-    
     changeTheme: (state, themeName) => {
       const themeData = themes[themeName]
       // console.log('changeTheme', themeName, themeData)
@@ -72,7 +53,8 @@ function makeState (actions) {
 
   const designReducers = require('./design/reducers')
   const ioReducers = require('./io/reducers')
-  reducers = Object.assign({}, reducers, designReducers, ioReducers)
+  const viewerReducers = require('./viewer/reducers')
+  reducers = Object.assign({}, reducers, designReducers, ioReducers, viewerReducers)
 
   const state$ = actions
     .scan(function (state, action) {

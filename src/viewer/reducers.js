@@ -1,3 +1,23 @@
+const initialize = () => {
+  return {// ridiculous shadowing of viewer state ?? or actually logical
+    rendering: {
+      background: [0.211, 0.2, 0.207, 1], // [1, 1, 1, 1],//54, 51, 53
+      meshColor: [0.4, 0.6, 0.5, 1] // nice orange : [1, 0.4, 0, 1]
+    },
+    grid: {
+      show: false,
+      color: [1, 1, 1, 0.1]
+    },
+    axes: {
+      show: true
+    },
+    smoothNormals: true,
+    // UGH
+    behaviours: {
+      resetViewOn: []
+    }
+  }
+}
 const toggleAutorotate = (state, autoRotate) => {
   const controls = Object.assign({}, state.viewer.controls, {autoRotate: {enabled: autoRotate}})
   const viewer = Object.assign({}, state.viewer, {controls})
@@ -23,6 +43,7 @@ const setProjectionType = (state, projectionType) => {
 }
 
 module.exports = {
+  initialize,
   toggleAutorotate,
   toggleGrid,
   toggleAxes,
