@@ -1,6 +1,6 @@
 const path = require('path')
-const {head} = require('../utils/utils')
-const {supportedFormatsForObjects, formats} = require('../io/formats')
+const {head} = require('../../utils/utils')
+const {supportedFormatsForObjects, formats} = require('./formats')
 
 const availableExportFormatsFromSolids = (solids) => {
   const formatsToIgnore = ['jscad', 'js']

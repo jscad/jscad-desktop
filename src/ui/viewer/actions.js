@@ -6,7 +6,7 @@ const actions = (sources) => {
       .map(e => e.target.checked),
     sources.store.map(data => data.viewer.grid.show)
   ])
-    //.map(show => ({grid: {show}}))
+    // .map(show => ({grid: {show}}))
     .map(data => ({type: 'toggleGrid', data}))
 
   const toggleAxes$ = most.mergeArray([

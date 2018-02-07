@@ -1,5 +1,6 @@
 const {remote} = require('electron')
 const {dialog} = remote
+const saveDataToFs = require('../../core/io/saveDataToFs')
 
 const actions = (sources) => {
   const changeExportFormat$ = sources.dom.select('#exportFormats').events('change')
@@ -16,7 +17,7 @@ const actions = (sources) => {
       const filePath = dialog.showSaveDialog({properties: ['saveFile'], title: 'export design to', defaultPath: defaultExportFilePath})//, function (filePath) {
       // console.log('saving', filePath)
       if (filePath !== undefined) {
-        const saveDataToFs = require('../io/saveDataToFs')
+        // FIXME: BAD ! does not use side effects!
         saveDataToFs(data, exportFormat, filePath)
       }
     })

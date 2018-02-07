@@ -1,6 +1,6 @@
 const fs = require('fs')
-const requireUncached = require('../design/code-loading/requireUncached')
-const resolveDependencies = require('../design/code-loading/resolveDependencies')
+const requireUncached = require('../core/code-loading/requireUncached')
+const resolveDependencies = require('../core/code-loading/resolveDependencies')
 const callBackToStream = require('../utils/observable-utils/callbackToObservable')
 
 const flatten = list => list.reduce(
@@ -70,7 +70,6 @@ function watchTree (rootPath, callback) {
   }
 
   watchers = createWatchers(allDependencyPaths)
-
   return watchers
 }
 

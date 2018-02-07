@@ -1,5 +1,5 @@
 const { CSG, CAG, isCSG, isCAG } = require('@jscad/csg')
-const { toArray } = require('../utils/utils')
+const { toArray } = require('../../utils/utils')
 
 // FIXME: is there not too much overlap with convertToBlob ?
 /**

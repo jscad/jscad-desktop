@@ -12,7 +12,7 @@ const initialState = {
   // for possible errors
   error: undefined,
   // design data
-  design: require('./design/reducers').initialize(),
+  design: require('./ui/design/reducers').initialize(),
   // export
   exportFormat: '',
   exportFilePath: '', // default export file path
@@ -25,7 +25,7 @@ const initialState = {
   // visuals
   themeName: 'light',
   mainTextColor: '#FFF',
-  viewer: require('./viewer/reducers').initialize(),
+  viewer: require('./ui/viewer/reducers').initialize(),
   // UI
   shortcuts: require('../data/keybindings.json'),
   // storage: this is not changeable, only for display
@@ -51,9 +51,9 @@ function makeState (actions) {
     }
   }
 
-  const designReducers = require('./design/reducers')
-  const ioReducers = require('./io/reducers')
-  const viewerReducers = require('./viewer/reducers')
+  const designReducers = require('./ui/design/reducers')
+  const ioReducers = require('./ui/io/reducers')
+  const viewerReducers = require('./ui/viewer/reducers')
   reducers = Object.assign({}, reducers, designReducers, ioReducers, viewerReducers)
 
   const state$ = actions

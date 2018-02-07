@@ -1,4 +1,4 @@
-const {exportFilePathFromFormatAndDesign} = require('./exportUtils')
+const {exportFilePathFromFormatAndDesign} = require('../../core/io/exportUtils')
 
 const initialize = () => {
   return {

@@ -56,18 +56,18 @@ function dom (state, paramsCallbacktoStream) {
       </div>
       
       <!--Params-->
-      <span id='params'>
+      <section id='params' style='visibility:${state.design.paramDefinitions.length === 0 ? 'hidden' : 'visible'}'>
         <span id='paramsMain'>
           <table>
             ${controls}
           </table>
         </span>
-        <span id='paramsControls' style='visibility:${state.design.paramDefinitions.length === 0 ? 'hidden' : 'visible'}'>
+        <span id='paramsControls'>
           <button id='updateDesignFromParams'>Update</button>
           <label for='instantUpdate'>Instant Update</label>
           <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
         </span>
-      </span>
+      </section>
 
       <!--Options-->
       <section id='options'>

@@ -5,10 +5,10 @@ onmessage = function (event) {
     if (data.cmd === 'render') {
       const {source, parameters, mainPath, options} = data
       const {isCAG, isCSG} = require('@jscad/csg')
-      const {toArray} = require('../utils/utils')
+      const {toArray} = require('../../utils/utils')
 
-      const {loadScript} = require('./code-loading/scriptLoading')
-      const requireUncached = require('./code-loading/requireUncached')
+      const {loadScript} = require('../code-loading/scriptLoading')
+      const requireUncached = require('../code-loading/requireUncached')
       // TODO: only uncache when needed
       requireUncached(mainPath)
       const {scriptRootModule, params, paramDefinitions} = loadScript(source, mainPath)

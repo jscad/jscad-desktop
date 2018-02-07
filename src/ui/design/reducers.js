@@ -1,8 +1,8 @@
 
 const path = require('path')
-const {getScriptFile, getDesignName} = require('./designUtils')
-const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('../io/exportUtils')
-const packageMetadata = require('../../package.json')
+const {getScriptFile, getDesignName} = require('../../core/code-loading/utils')
+const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('../../core/io/exportUtils')
+const packageMetadata = require('../../../package.json')
 
 const initialize = () => {
   return {

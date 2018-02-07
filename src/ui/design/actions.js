@@ -1,6 +1,7 @@
 const most = require('most')
 const {remote} = require('electron')
 const {dialog} = remote
+const getParameterValues = require('../../core/parameters/getParameterValues')
 
 const actions = (sources) => {
   const designPath$ = most.mergeArray([
@@ -37,7 +38,7 @@ const actions = (sources) => {
       .map(function () {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('./parameters/getParameterValues')(controls)
+        const paramValues = getParameterValues(controls)
         return {paramValues, origin: 'manualUpdate'}
       })
       .multicast(),
@@ -46,7 +47,7 @@ const actions = (sources) => {
       try {
         const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
-        const paramValues = require('./parameters/getParameterValues')(controls)
+        const paramValues = getParameterValues(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
         return {error, origin: 'instantUpdate'}
