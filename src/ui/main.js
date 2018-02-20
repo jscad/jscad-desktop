@@ -57,7 +57,7 @@ function dom (state, paramsCallbacktoStream) {
       
       <!--Params-->
       <section id='params' style='visibility:${state.design.paramDefinitions.length === 0 ? 'hidden' : 'visible'}'>
-        <span id='paramsMain'>
+        <span id='paramsTable'>
           <table>
             ${controls}
           </table>
@@ -71,23 +71,30 @@ function dom (state, paramsCallbacktoStream) {
 
       <!--Options-->
       <section id='options'>
-        Options
-        NOT functional yet !!!
-        <table>
-          <tr>
-            <th>Timeout for solids generation</th>
-            <th><input type='number' min=0 max=200000 value=${state.solidsTimeOut}/></th>
-          </tr>
-          <tr>
-            <th>Zoom to fit</th>
-            <th><input type='checkbox' checked=false/></th>
-          </tr>
-          <tr>
-            <th>Storage path</th>
-            <th>${state.storage.path}</th>
-          </tr>
-        </table>
-        
+        <fieldset>
+            <legend> <h3> Geometry </h3> </legend>
+            <label>Timeout for solids generation
+              <input id='solidsTimeout' type='number' min=0 max=200000 value=${state.solidsTimeOut}/>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend> <h3> 3d Viewer </h3> </legend>  
+            <label>Zoom to fit on new parameters
+              <input type='checkbox' checked=false/>
+            </label>
+            <label>Zoom to fit on design load
+              <input type='checkbox' checked=false/>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend> <h3> Storage </h3> </legend>  
+            <label>Settings Storage path (not settable)
+              <input type='text' disabled value='${state.storage.path}'/>
+            </label>
+          </fieldset>
+
       </section>
 
       <canvas id='renderTarget'> </canvas>
