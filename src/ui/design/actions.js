@@ -36,8 +36,8 @@ const actions = (sources) => {
   const updateDesignFromParams$ = most.mergeArray([
     sources.dom.select('#updateDesignFromParams').events('click')
       .map(function () {
-        const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
-          .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
+        const controls = Array.from(document.getElementById('paramsTable').getElementsByTagName('input'))
+          .concat(Array.from(document.getElementById('paramsTable').getElementsByTagName('select')))
         const paramValues = getParameterValues(controls)
         return {paramValues, origin: 'manualUpdate'}
       })
@@ -45,8 +45,8 @@ const actions = (sources) => {
     sources.paramChanges.multicast().map(function (_controls) {
       // FIXME: clunky
       try {
-        const controls = Array.from(document.getElementById('paramsMain').getElementsByTagName('input'))
-          .concat(Array.from(document.getElementById('paramsMain').getElementsByTagName('select')))
+        const controls = Array.from(document.getElementById('paramsTable').getElementsByTagName('input'))
+          .concat(Array.from(document.getElementById('paramsTable').getElementsByTagName('select')))
         const paramValues = getParameterValues(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
