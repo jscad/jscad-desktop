@@ -70,7 +70,7 @@ function dom (state, paramsCallbacktoStream) {
       </section>
 
       <!--Options-->
-      <section id='options'>
+      <section id='options' style='visibility:hidden'>
         <fieldset>
             <legend> <h3> Geometry </h3> </legend>
             <label>Timeout for solids generation
