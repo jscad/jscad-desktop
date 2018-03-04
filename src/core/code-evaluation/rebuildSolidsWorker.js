@@ -3,14 +3,17 @@ const makeBuildCachedGeometryFromTree = require('jscad-tree-experiment').buildCa
 console.log('calling this one here')
 const buildCachedGeometryFromTree = makeBuildCachedGeometryFromTree({passesBeforeElimination: 20})
 
+const defaults = {vTreeMode: true}
+
 onmessage = function (event) {
   if (event.data instanceof Object) {
     console.log('in web worker')
-
     const {data} = event
     if (data.cmd === 'render') {
       const {source, parameters, mainPath, options} = data
-      // const {vTreeMode:}
+      const {vTreeMode} = Object.assign({}, defaults, options)
+      const apiMainPath = vTreeMode ? './vtreeApi' : '@jscad/csg/api'
+
       const {isCAG, isCSG} = require('@jscad/csg')
       const {toArray} = require('../../utils/utils')
 
@@ -18,7 +21,7 @@ onmessage = function (event) {
       const requireUncached = require('../code-loading/requireUncached')
       // TODO: only uncache when needed
       requireUncached(mainPath)
-      const {scriptRootModule, params, paramDefinitions} = loadScript(source, mainPath)
+      const {scriptRootModule, params, paramDefinitions} = loadScript(source, mainPath, apiMainPath)
       const paramDefaults = params
       const paramValues = Object.assign({}, paramDefaults, parameters)
       // console.log('paramDefinitions', paramDefinitions, 'paramValues', paramValues)

@@ -6,11 +6,12 @@ const doesModuleExportParameterDefiniitions = moduleToCheck => {
   return moduleToCheck && 'getParameterDefinitions' in moduleToCheck
 }
 
+//require('jscad-tree-experiment')
 /** load a jscad script, injecting the basic dependencies if necessary
  * @param  {} filePath
  * @param  {} csgBasePath='../../../../core/tmp/csg.js : relative path or  '@jscad/csg'
  */
-function loadScript (scriptAsText, filePath, csgBasePath = '@jscad/csg/api') {
+function loadScript (scriptAsText, filePath, csgBasePath = './vtreeApi') {
   if (csgBasePath.includes('.')) {
     csgBasePath = path.resolve(__dirname, csgBasePath)
   }
