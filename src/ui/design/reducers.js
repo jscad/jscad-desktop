@@ -55,23 +55,32 @@ const setDesignContent = (state, source) => {
   })
 }
 
-const setDesignSolids = (state, {solids, paramDefaults, paramValues, paramDefinitions}) => {
+const setDesignSolids = (state, {solids}) => {
   console.log('setDesignSolids')
   const design = Object.assign({}, state.design, {
-    solids,
-    paramDefaults,
-    paramValues,
-    paramDefinitions
+    solids
   })
   const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
   const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
-
+  console.log('here')
   return Object.assign({}, state, {
     design,
     busy: false,
     availableExportFormats,
     exportFormat
   }, exportInfos)
+}
+
+const setDesignParams = (state, {paramDefaults, paramValues, paramDefinitions}) => {
+  console.log('setDesignParams')
+  const design = Object.assign({}, state.design, {
+    paramDefaults,
+    paramValues,
+    paramDefinitions
+  })
+  return Object.assign({}, state, {
+    design
+  })
 }
 
 const updateDesignFromParams = (state, {paramValues, origin, error}) => {
@@ -112,6 +121,7 @@ module.exports = {
   initialize,
   setDesignPath,
   setDesignContent,
+  setDesignParams,
   setDesignSolids,
   updateDesignFromParams,
   timeOutDesignGeneration,

@@ -60,7 +60,10 @@ const actions = (sources) => {
   const setDesignSolids$ = most.mergeArray([
     sources.solidWorker
       .filter(event => !('error' in event))
+      .filter(event => event.data instanceof Object)
+      .filter(event => event.data.type === 'solids')
       .map(function (event) {
+        console.log('event', event)
         try {
           if (event.data instanceof Object) {
             const { CAG, CSG } = require('@jscad/csg')
@@ -68,8 +71,7 @@ const actions = (sources) => {
               if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
               if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
             })
-            const {paramDefaults, paramValues, paramDefinitions} = event.data
-            return {solids, paramDefaults, paramValues, paramDefinitions}
+            return {solids}
           }
         } catch (error) {
           return {error}
@@ -77,6 +79,22 @@ const actions = (sources) => {
       })
   ])
     .map(data => ({type: 'setDesignSolids', data}))
+
+  const setDesignParams$ = most.mergeArray([
+    sources.solidWorker
+      .filter(event => !('error' in event))
+      .filter(event => event.data instanceof Object)
+      .filter(event => event.data.type === 'params')
+      .map(function (event) {
+        try {
+          const {paramDefaults, paramValues, paramDefinitions} = event.data
+          return {paramDefaults, paramValues, paramDefinitions}
+        } catch (error) {
+          return {error}
+        }
+      })
+  ])
+      .map(data => ({type: 'setDesignParams', data}))
 
   const timeOutDesignGeneration$ = designPath$
     .delay(60000)
@@ -103,6 +121,7 @@ const actions = (sources) => {
     setDesignContent$,
     updateDesignFromParams$,
     timeOutDesignGeneration$,
+    setDesignParams$,
     setDesignSolids$,
 
     // ui

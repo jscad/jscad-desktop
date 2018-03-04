@@ -128,6 +128,8 @@ state$
 const outToDom$ = state$
   .skipRepeatsWith(function (state, previousState) {
     const sameParamDefinitions = JSON.stringify(state.design.paramDefinitions) === JSON.stringify(previousState.design.paramDefinitions)
+    const sameParamValues = JSON.stringify(state.design.paramValues) === JSON.stringify(previousState.design.paramValues)
+
     const sameInstantUpdate = state.instantUpdate === previousState.instantUpdate
 
     const sameExportFormats = state.exportFormat === previousState.exportFormat &&
@@ -140,7 +142,7 @@ const outToDom$ = state$
     const sameError = JSON.stringify(state.error) === JSON.stringify(previousState.error)
     const sameStatus = state.busy === previousState.busy
 
-    return sameParamDefinitions && sameExportFormats && sameStatus && sameStyling &&
+    return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
       sameAutoreload && sameInstantUpdate && sameError
   })
   .map(state => require('./ui/main')(state, paramsCallbacktoStream))
