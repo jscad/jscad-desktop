@@ -1,7 +1,7 @@
 const most = require('most')
 const {remote} = require('electron')
 const {dialog} = remote
-const getParameterValues = require('../../core/parameters/getParameterValues')
+const getParameterValuesFromUIControls = require('../../core/parameters/getParameterValuesFromUIControls')
 
 const actions = (sources) => {
   const designPath$ = most.mergeArray([
@@ -38,7 +38,7 @@ const actions = (sources) => {
       .map(function () {
         const controls = Array.from(document.getElementById('paramsTable').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsTable').getElementsByTagName('select')))
-        const paramValues = getParameterValues(controls)
+        const paramValues = getParameterValuesFromUIControls(controls)
         return {paramValues, origin: 'manualUpdate'}
       })
       .multicast(),
@@ -47,7 +47,7 @@ const actions = (sources) => {
       try {
         const controls = Array.from(document.getElementById('paramsTable').getElementsByTagName('input'))
           .concat(Array.from(document.getElementById('paramsTable').getElementsByTagName('select')))
-        const paramValues = getParameterValues(controls)
+        const paramValues = getParameterValuesFromUIControls(controls)
         return {paramValues, origin: 'instantUpdate'}
       } catch (error) {
         return {error, origin: 'instantUpdate'}

@@ -88,7 +88,7 @@ solidWorker.sink(
       if (error) {
         return undefined
       }
-      const applyParameterDefinitions = require('./core/parameters/applyParameterDefinitions')
+      const applyParameterDefinitions = require('@jscad/core/parameters/applyParameterDefinitions')
       paramValues = paramValues || design.paramValues // this ensures the last, manually modified params have upper hand
       paramValues = paramValues ? applyParameterDefinitions(paramValues, design.paramDefinitions) : paramValues
       if (!instantUpdate && origin === 'instantUpdate') {
