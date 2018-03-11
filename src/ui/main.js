@@ -11,7 +11,7 @@ function dom (state, paramsCallbacktoStream) {
   const {controls} = createParamControls(paramValues, paramDefinitions, paramsCallbacktoStream.callback)
 
   const statusMessage = state.error !== undefined
-    ? `Error: ${state.error.message} details:  ${state.error.stack}` : ''
+    ? `Error: ${state.error.message} line: ${state.error.lineno}, filename:${state.error.filename} stack:  ${state.error.stack}` : ''
 
   const output = html`
     <div id='container' style='color:${state.mainTextColor}'>

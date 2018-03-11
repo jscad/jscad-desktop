@@ -48,6 +48,11 @@ function makeState (actions) {
     clearErrors: (state, _) => {
       console.log('clear errors')
       return Object.assign({}, state, {error: undefined})
+    },
+    setErrors: (state, {error}) => {
+      console.log('set Errors', error)
+      const formattedError = error//{message: error.message, lineno:}
+      return Object.assign({}, state, {error: formattedError, busy: false})
     }
   }
 
