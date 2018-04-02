@@ -1,6 +1,6 @@
 
 const path = require('path')
-const {getScriptFile, getDesignName} = require('../../core/code-loading/utils')
+const {getDesignEntryPoint, getDesignName} = require('@jscad/core/code-loading/requireDesignUtilsFs')
 const {availableExportFormatsFromSolids, exportFilePathFromFormatAndDesign} = require('../../core/io/exportUtils')
 const packageMetadata = require('../../../package.json')
 
@@ -23,7 +23,7 @@ const initialize = () => {
 
 const setDesignPath = (state, paths) => {
   console.log('setDesignPath')
-  const mainPath = getScriptFile(paths)
+  const mainPath = getDesignEntryPoint(paths)
   const filePath = paths[0]
   const designName = getDesignName(paths)
   const designPath = path.dirname(filePath)

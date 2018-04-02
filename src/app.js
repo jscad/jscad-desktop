@@ -142,8 +142,10 @@ const outToDom$ = state$
     const sameError = JSON.stringify(state.error) === JSON.stringify(previousState.error)
     const sameStatus = state.busy === previousState.busy
 
+    const sameShowOptions = state.showOptions === previousState.showOptions
+
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
-      sameAutoreload && sameInstantUpdate && sameError
+      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions
   })
   .map(state => require('./ui/main')(state, paramsCallbacktoStream))
 

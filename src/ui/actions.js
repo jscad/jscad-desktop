@@ -53,6 +53,11 @@ const makeActions = (sources) => {
   ])
   .map(data => ({type: 'changeTheme', data}))
 
+  const toggleOptions$ = most.mergeArray([
+    sources.dom.select('#toggleOptions').events('click')
+  ])
+  .map(data => ({type: 'toggleOptions', data}))
+
   // non visual related actions
   const setErrors$ = most.mergeArray([
     sources.solidWorker.filter(event => 'error' in event)
@@ -75,7 +80,8 @@ const makeActions = (sources) => {
     clearErrors$,
     setErrors$,
     // ui
-    changeTheme$
+    changeTheme$,
+    toggleOptions$
   }
 }
 
