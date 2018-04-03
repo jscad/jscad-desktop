@@ -42,12 +42,92 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
     - if that fails it tries to look for a js/jscad file that has the same name as the folder
  *  unlike the web based UI you can (and are **encouraged to**) use jscad designs defined as common.js modules, so you can use
  ```require(<moduleName>)``` calls to include other functions, shapes etc
- * in your main file, when using common.js modules please favor named exports ie :
+ * in your main file, when using common.js modules please use named exports ie :
   ```javascript module.exports = {main, getParameterDefinitions}```
  * VERY IMPORTANT : if you use common.js modules you HAVE to `require()` all the OpenJSCAD modules you use (like `@jscad/csg` etc) **yourself**: if the app detects that you do not have `module.exports`, then it will inject all the OpenJSCAD api itself, with a MAJOR limitation at this time:
   you cannot make require() calls from anything but the root level file, and you do not have access to the API (this will get fixed)
 
- > there will NOT be out of the box support for es6 modules anytime soon, please use a transpiler (Babel.js etc)
+ > there will NOT be out of the box support for es6 modules anytime soon, please use a transpiler (Babel.js etc) if you want to use es modules
+
+ ## geometry caching/vtree
+
+ this is an experimental feature that adds a HUGE performance boost by turning the various geometry creation
+ functions (so cube(), sphere(), union(), difference() etc into a virtual tree, and caching each of the items in the tree when evaluating the tree into actual csg/cag object
+ you can see more information about it [here](https://github.com/kaosat-dev/jscad-tree-experiments)
+
+  >Tip:
+  to take even more advantage of this feature, please have your *main()* script return an array of shapes
+  if there are multiple independant shapes/parts, as union() operations are more costly
+
+ ### Limitations
+
+- LIMITATION 1 :
+ this **ONLY WORKS WITH THE FUNCTIONAL API** !! ie 
+ cube(), sphere(), union(), difference(), translate(), scale() etc
+ but **NOT** CSG.cube(), csgObject.union(xxx), csgObject.translate(xxx)
+
+- LIMITATION 2: because of the limitation above you CANNOT mix the two coding styles: so this is **FUNCTIONAL API ONLY, NO MIXING** !!
+ since the non functional api will become deprecated soon, this is future facing decision regardless :)
+
+
+
+ ### How to use it : (temporary instructions)
+
+  > Note: this is experimental, and somewhat clunky, will VERY LIKELY change in the future !!!
+
+  1 - with explicit require() calls (prefered method)
+
+  - install the following package in your design
+
+    ```npm install kaosat-dev/jscad-tree-experiments```
+
+  - replace your ```require('@jscad/csg/api')``` calls with ```require('jscad-tree-experiment').api```
+
+  - example :
+
+    this script 
+    ```javascript 
+      const {cylinder} = require('@jscad/csg/api').primitives3d
+      const {color} = require('@jscad/csg/api').color
+      const {difference} = require('@jscad/csg/api').booleanOps
+      const {translate} = require('@jscad/csg/api').transformations
+
+      module.exports = function assemblyMount (params) {
+        const {plateThickness, plateOffset, assemblyMountDia, assemblyMountBoltDia} = params
+        return translate([0, 0, plateThickness], color('gray',
+          difference(
+            cylinder({h: plateOffset - plateThickness, d: assemblyMountDia}),
+            cylinder({h: plateOffset - plateThickness, d: assemblyMountBoltDia})
+          )
+        ))
+      }
+    ```
+    should become
+
+    ```javascript
+
+      const {cylinder} = require('jscad-tree-experiment').api.primitives3d
+      const {color} = require('jscad-tree-experiment').api.color
+      const {difference} = require('jscad-tree-experiment').api.booleanOps
+      const {translate} = require('jscad-tree-experiment').api.transformations
+
+      module.exports = function assemblyMount (params) {
+        const {plateThickness, plateOffset, assemblyMountDia, assemblyMountBoltDia} = params
+        return translate([0, 0, plateThickness], color('gray',
+          difference(
+            cylinder({h: plateOffset - plateThickness, d: assemblyMountDia}),
+            cylinder({h: plateOffset - plateThickness, d: assemblyMountBoltDia})
+          )
+        ))
+      }
+    ```
+
+  2 - For old still scripts without explicit require() calls
+
+  just toggle the 'Experimental geometry caching:' setting in the options panel (turned on by default)
+  be warned however that a lot of 
+
+
 
 pre-alpha, expect bugs! 
 
