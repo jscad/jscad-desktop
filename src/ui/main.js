@@ -75,7 +75,10 @@ function dom (state, paramsCallbacktoStream) {
 
       <!--Options-->
       <section id='options' style='visibility:${state.showOptions ? 'visible' : 'hidden'}; color:${state.themeSettings.secondaryTextColor}'>
-        Note: most of these are not yet working EXCEPT themes
+        Currently ONLY working /settable options are:
+         <br>* themes 
+         <br>* geometry caching
+         
         <fieldset>
           <legend> <h3> Theme </h3> </legend>
           <select id='themeSwitcher'>
@@ -83,12 +86,16 @@ function dom (state, paramsCallbacktoStream) {
             <option value='light' selected=${state.themeName === 'light'}>Light Theme</option>
           </select>
         </fieldset>
+
         <fieldset>
-            <legend> <h3> Geometry </h3> </legend>
-            <label>Timeout for solids generation
-              <input id='solidsTimeout' type='number' min=0 max=200000 value=${state.solidsTimeOut}/>
-            </label>
-          </fieldset>
+          <legend> <h3> Geometry generation</h3> </legend>
+          <label>Experimental geometry caching: (see <a href='https://github.com/jscad/jscad-desktop#script-handling' target="_blank">docs</a>)
+            <input id='toggleVtreeMode' type='checkbox' checked=${state.vtreeMode}/>
+          </label>
+          <label>Timeout for solids generation
+            <input id='solidsTimeout' type='number' min=0 max=200000 value=${state.solidsTimeOut}/>
+          </label>
+        </fieldset>
 
           <fieldset>
             <legend> <h3> 3d Viewer </h3> </legend>  
