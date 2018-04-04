@@ -45,12 +45,13 @@ titleBarSink(
 electronStoreSink(state$
   .map(function (state) {
     const {themeName, design} = state
-    const {name, mainPath} = design
+    const {name, mainPath, vtreeMode} = design
     return {
       themeName,
       design: {
         name,
-        mainPath
+        mainPath,
+        vtreeMode
       },
       viewer: {
         axes: {show: state.viewer.axes.show},
@@ -88,14 +89,16 @@ solidWorker.sink(
       if (error) {
         return undefined
       }
+      console.log('design stuff', design)
       const applyParameterDefinitions = require('@jscad/core/parameters/applyParameterDefinitions')
       paramValues = paramValues || design.paramValues // this ensures the last, manually modified params have upper hand
       paramValues = paramValues ? applyParameterDefinitions(paramValues, design.paramDefinitions) : paramValues
       if (!instantUpdate && origin === 'instantUpdate') {
         return undefined
       }
-      console.log('sending paramValues', paramValues)
-      return {source: design.source, mainPath: design.mainPath, paramValues}
+      // console.log('sending paramValues', paramValues, 'options', vtreeMode)
+      const options = {vtreeMode: design.vtreeMode, lookup: design.lookup, lookupCounts: design.lookupCounts}
+      return {source: design.source, mainPath: design.mainPath, paramValues, options}
     },
     solidWorkerBase$,
     solidWorkerBase$,
@@ -104,7 +107,7 @@ solidWorker.sink(
       .skipRepeats()
   )
     .filter(x => x !== undefined)
-    .map(({source, mainPath, paramValues}) => ({cmd: 'render', source, mainPath, parameters: paramValues}))
+    .map(({source, mainPath, paramValues, options}) => ({cmd: 'render', source, mainPath, parameters: paramValues, options}))
 )
 
 // viewer data
@@ -143,9 +146,10 @@ const outToDom$ = state$
     const sameStatus = state.busy === previousState.busy
 
     const sameShowOptions = state.showOptions === previousState.showOptions
+    const samevtreeMode = state.vtreeMode === previousState.vtreeMode
 
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
-      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions
+      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode
   })
   .map(state => require('./ui/main')(state, paramsCallbacktoStream))
 
@@ -167,7 +171,7 @@ domSink(outToDom$)
     if (csgViewer) {
       csgViewer(params)
     }
-  })*/
+  }) */
 state$
   .map(state => state.viewer)
   .skipRepeatsWith(function (state, previousState) {

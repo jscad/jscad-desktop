@@ -6,23 +6,31 @@ const packageMetadata = require('../../../package.json')
 
 const initialize = () => {
   return {
+    // metadata
     name: '',
     path: '',
     mainPath: '',
+    // list of all paths of require() calls + main
+    modulePaths: [],
+    // code
     script: '',
     source: '',
+    // parameters
     paramDefinitions: [],
     paramValues: {},
     paramDefaults: {},
     previousParams: {},
+    // solids
     solids: [],
-    // list of all paths of require() calls + main
-    modulePaths: []
+    // geometry caching
+    vtreeMode: true,
+    lookup: {},
+    lookupCounts: {}
   }
 }
 
 const setDesignPath = (state, paths) => {
-  console.log('setDesignPath')
+  // console.log('setDesignPath')
   const mainPath = getDesignEntryPoint(paths)
   const filePath = paths[0]
   const designName = getDesignName(paths)
@@ -40,7 +48,7 @@ const setDesignPath = (state, paths) => {
 }
 
 const setDesignContent = (state, source) => {
-  console.log('setDesignContent')
+  // console.log('setDesignContent')
   /*
     func(paramDefinitions) => paramsUI
     func(paramsUI + interaction) => params
@@ -55,14 +63,15 @@ const setDesignContent = (state, source) => {
   })
 }
 
-const setDesignSolids = (state, {solids}) => {
+const setDesignSolids = (state, {solids, lookup, lookupCounts}) => {
   console.log('setDesignSolids')
   const design = Object.assign({}, state.design, {
-    solids
+    solids,
+    lookup,
+    lookupCounts
   })
   const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
   const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
-  console.log('here')
   return Object.assign({}, state, {
     design,
     busy: false,
@@ -117,6 +126,12 @@ const toggleInstantUpdate = (state, instantUpdate) => {
   return Object.assign({}, state, {instantUpdate})
 }
 
+const toggleVtreeMode = (state, vtreeMode) => {
+  console.log('toggleVtreeMode', vtreeMode)
+  const design = Object.assign({}, state.design, {vtreeMode})
+  return Object.assign({}, state, {design})
+}
+
 module.exports = {
   initialize,
   setDesignPath,
@@ -128,5 +143,6 @@ module.exports = {
 
   // ui/toggles
   toggleAutoReload,
-  toggleInstantUpdate
+  toggleInstantUpdate,
+  toggleVtreeMode
 }

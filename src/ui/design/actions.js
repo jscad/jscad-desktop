@@ -63,7 +63,6 @@ const actions = (sources) => {
       .filter(event => event.data instanceof Object)
       .filter(event => event.data.type === 'solids')
       .map(function (event) {
-        console.log('event', event)
         try {
           if (event.data instanceof Object) {
             const { CAG, CSG } = require('@jscad/csg')
@@ -71,7 +70,8 @@ const actions = (sources) => {
               if (object['class'] === 'CSG') { return CSG.fromCompactBinary(object) }
               if (object['class'] === 'CAG') { return CAG.fromCompactBinary(object) }
             })
-            return {solids}
+            const {lookupCounts, lookup} = event.data
+            return {solids, lookup, lookupCounts}
           }
         } catch (error) {
           return {error}
@@ -96,8 +96,10 @@ const actions = (sources) => {
   ])
       .map(data => ({type: 'setDesignParams', data}))
 
-  const timeOutDesignGeneration$ = designPath$
-    .delay(60000)
+  const timeOutDesignGeneration$ = most.never()
+    /* designPath$
+    sources.state$
+    .delay(60000) */
     .map(data => ({type: 'timeOutDesignGeneration', data}))
     .tap(x => console.log('timeOutDesignGeneration'))
 
@@ -116,6 +118,12 @@ const actions = (sources) => {
   ])
     .map(data => ({type: 'toggleInstantUpdate', data}))
 
+  const toggleVTreeMode$ = most.mergeArray([
+    sources.dom.select('#toggleVtreeMode').events('click').map(event => event.target.checked),
+    sources.store.map(data => data.design.vtreeMode)
+  ])
+    .map(data => ({type: 'toggleVtreeMode', data}))
+
   return {
     setDesignPath$,
     setDesignContent$,
@@ -126,7 +134,8 @@ const actions = (sources) => {
 
     // ui
     toggleAutoReload$,
-    toggleInstantUpdate$
+    toggleInstantUpdate$,
+    toggleVTreeMode$
   }
 }
 

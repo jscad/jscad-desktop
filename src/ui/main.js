@@ -90,7 +90,7 @@ function dom (state, paramsCallbacktoStream) {
         <fieldset>
           <legend> <h3> Geometry generation</h3> </legend>
           <label>Experimental geometry caching: (see <a href='https://github.com/jscad/jscad-desktop#script-handling' target="_blank">docs</a>)
-            <input id='toggleVtreeMode' type='checkbox' checked=${state.vtreeMode}/>
+            <input id='toggleVtreeMode' type='checkbox' checked=${state.design.vtreeMode}/>
           </label>
           <label>Timeout for solids generation
             <input id='solidsTimeout' type='number' min=0 max=200000 value=${state.solidsTimeOut}/>
