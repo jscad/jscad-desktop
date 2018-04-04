@@ -11,6 +11,7 @@ const actions = (sources) => {
         return paths
       }),
     sources.store
+      .filter(data => data && data.design && data.design.mainPath)
       .map(data => data.design.mainPath)
       .filter(data => data !== '')
       .map(data => [data]),
@@ -80,7 +81,7 @@ const actions = (sources) => {
         }
       }),
     sources.fs
-      .filter(data => data.operation === 'read' && data.id === 'loadCachedGeometry')
+      .filter(res => res.operation === 'read' && res.id === 'loadCachedGeometry' && res.data)
       .map(raw => {
         const deserialize = require('serialize-to-js').deserialize
         const lookup = deserialize(raw.data)
@@ -103,8 +104,8 @@ const actions = (sources) => {
         }
       }),
     sources.store
+      .filter(data => data && data.design && data.design.parameters)
       .map(data => data.design.parameters)
-      .filter(parameters => parameters !== undefined)
   ])
       .map(data => ({type: 'setDesignParams', data}))
 
@@ -120,19 +121,24 @@ const actions = (sources) => {
     sources.dom.select('#autoReload').events('click')
       .map(e => e.target.checked),
     sources.store
+      .filter(data => data && data.autoReload !== undefined)
       .map(data => data.autoReload)
   ])
   .map(data => ({type: 'toggleAutoReload', data}))
 
   const toggleInstantUpdate$ = most.mergeArray([
     sources.dom.select('#instantUpdate').events('click').map(event => event.target.checked),
-    sources.store.map(data => data.instantUpdate)
+    sources.store
+      .filter(data => data && data.instantUpdate !== undefined)
+      .map(data => data.instantUpdate)
   ])
     .map(data => ({type: 'toggleInstantUpdate', data}))
 
   const toggleVTreeMode$ = most.mergeArray([
     sources.dom.select('#toggleVtreeMode').events('click').map(event => event.target.checked),
-    sources.store.map(data => data.design.vtreeMode)
+    sources.store
+      .filter(data => data && data.design && data.design.vtreeMode !== undefined)
+      .map(data => data.design.vtreeMode)
   ])
     .map(data => ({type: 'toggleVtreeMode', data}))
 

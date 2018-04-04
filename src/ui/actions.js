@@ -49,8 +49,11 @@ const makeActions = (sources) => {
   const changeTheme$ = most.mergeArray([
     sources.dom.select('#themeSwitcher').events('change')
       .map(e => e.target.value),
-    sources.store.map(data => data.themeName)
+    sources.store
+      .filter(data => data && data.themeName)
+      .map(data => data.themeName)
   ])
+  .startWith('light')
   .map(data => ({type: 'changeTheme', data}))
 
   const toggleOptions$ = most.mergeArray([
