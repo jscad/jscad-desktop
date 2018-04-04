@@ -28,8 +28,6 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
   - the include() function , [since include is EVIIIL and an antipattern
 (an alternative to include() will soon be provided)](https://github.com/jscad/OpenJSCAD.org/issues/245)
   - direct loading/conversion of other formats expect for .js/jscad is not supported (yet)
-  - scripts are not evaluated in a background worker, so the Ui will freeze when evaluating complex designs (this will be fixed
-  down the line)
   - there is no text editor included, because I am still on the fence about including one: why have something half baked when there are so many great , free & open source code editors these days ? ([Atom](https://atom.io/), [Visual Studio Code](https://code.visualstudio.com/))
   - transitive file watching is not yes supported: ie if you change things outside of your main file, the ui will not update
   - file watching can fire change events twice occasionaly
@@ -49,7 +47,7 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
 
  > there will NOT be out of the box support for es6 modules anytime soon, please use a transpiler (Babel.js etc) if you want to use es modules
 
- ## geometry caching/vtree
+ ## geometry caching
 
  this is an experimental feature that adds a HUGE performance boost by turning the various geometry creation
  functions (so cube(), sphere(), union(), difference() etc into a virtual tree, and caching each of the items in the tree when evaluating the tree into actual csg/cag object
@@ -59,6 +57,8 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
   to take even more advantage of this feature, please have your *main()* script return an array of shapes
   if there are multiple independant shapes/parts, as union() operations are more costly
 
+  This desktop app also saves your current design's cache to the hard drive, making a reload after restarting the app very fast! IF you follow the instructions/limitations below
+  
  ### Limitations
 
 - LIMITATION 1 :
@@ -76,6 +76,8 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
   > Note: this is experimental, and somewhat clunky, will VERY LIKELY change in the future !!!
 
   1 - with explicit require() calls (prefered method)
+
+  - toggle the 'Experimental geometry caching:' setting in the options panel (turned on by default)
 
   - install the following package in your design
 
@@ -122,10 +124,13 @@ A LOT OF THE THINGS HERE CAN AND WILL CHANGE!! This softare is pre-alpha, use at
       }
     ```
 
+    you can find an example design that uses these imports and makes full use of the speedups here:
+    https://github.com/kaosat-dev/Isolos
+
   2 - For old still scripts without explicit require() calls
 
   just toggle the 'Experimental geometry caching:' setting in the options panel (turned on by default)
-  be warned however that a lot of 
+  be warned however that a lot of the official examples etc will not work with this out of the box
 
 
 
