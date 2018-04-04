@@ -27,7 +27,9 @@ const actions = (sources) => {
     .delay(1)
 
   const setDesignContent$ = most.mergeArray([
-    sources.fs.filter(data => data.operation === 'read').map(raw => raw.data),
+    sources.fs
+      .filter(data => data.operation === 'read' && data.id === 'loadScript')
+      .map(raw => raw.data),
     sources.watcher.map(({filePath, contents}) => contents)
   ])
     .map(data => ({type: 'setDesignContent', data}))
@@ -76,6 +78,13 @@ const actions = (sources) => {
         } catch (error) {
           return {error}
         }
+      }),
+    sources.fs
+      .filter(data => data.operation === 'read' && data.id === 'loadCachedGeometry')
+      .map(raw => {
+        const deserialize = require('serialize-to-js').deserialize
+        const lookup = deserialize(raw.data)
+        return {solids: undefined, lookupCounts: undefined, lookup}
       })
   ])
     .map(data => ({type: 'setDesignSolids', data}))

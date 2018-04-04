@@ -65,6 +65,9 @@ const setDesignContent = (state, source) => {
 
 const setDesignSolids = (state, {solids, lookup, lookupCounts}) => {
   console.log('setDesignSolids')
+  solids = solids ? solids : []
+  lookup = lookup ? lookup : {}
+  lookupCounts = lookupCounts ? lookupCounts : {}
   const design = Object.assign({}, state.design, {
     solids,
     lookup,
@@ -72,6 +75,9 @@ const setDesignSolids = (state, {solids, lookup, lookupCounts}) => {
   })
   const {exportFormat, availableExportFormats} = availableExportFormatsFromSolids(solids)
   const exportInfos = exportFilePathFromFormatAndDesign(design, exportFormat)
+
+  serializeGeometryCache(lookup)
+
   return Object.assign({}, state, {
     design,
     busy: false,
@@ -130,6 +136,31 @@ const toggleVtreeMode = (state, vtreeMode) => {
   console.log('toggleVtreeMode', vtreeMode)
   const design = Object.assign({}, state.design, {vtreeMode})
   return Object.assign({}, state, {design})
+}
+
+const serializeGeometryCache = (cache) => {
+  const fs = require('fs')
+  const electron = require('electron').remote
+  const serialize = require('serialize-to-js').serialize
+
+  const userDataPath = electron.app.getPath('userData')
+  const path = require('path')
+
+  const cachePath = path.join(userDataPath, '/cache.js')
+  /*if (!fs.existsSync(cachePath)) {
+    fs.mkdirSync(cachePath)
+  }*/
+
+  let data = {}
+  Object.keys(cache).forEach(function (key) {
+    data[key] = cache[key]// .toCompactBinary()
+  })
+  const compactBinary = data
+  const compactOutput = serialize(compactBinary)
+  const content = compactOutput // 'compactBinary=' + 
+  fs.writeFileSync(cachePath, content)
+  // return output
+  // fs.writeFileSync('compactBinary.js', )
 }
 
 module.exports = {

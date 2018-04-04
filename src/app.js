@@ -1,3 +1,4 @@
+const most = require('most')
 const {proxy} = require('most-proxy')
 const {makeState} = require('./state')
 const makeCsgViewer = require('@jscad/csg-viewer')
@@ -76,14 +77,24 @@ watcherSink(
 )
 // data out to file system sink
 fsSink(
-  state$
-    .filter(state => state.design.mainPath !== '')
-    .map(state => state.design.mainPath)
-    .skipRepeats()
-    .map(path => ({operation: 'read', id: 'loadScript', path}))
+  most.mergeArray([
+    state$
+      .filter(state => state.design.mainPath !== '')
+      .map(state => state.design.mainPath)
+      .skipRepeats()
+      .map(path => ({operation: 'read', id: 'loadScript', path})),
+    most.just()
+      .map(function () {
+        const electron = require('electron').remote
+        const userDataPath = electron.app.getPath('userData')
+        const path = require('path')
+
+        const cachePath = path.join(userDataPath, '/cache.js')
+        return {operation: 'read', id: 'loadCachedGeometry', path: cachePath}
+      })
+  ])
 )
 
-const most = require('most')
 const solidWorkerBase$ = most.mergeArray([
   actions$.setDesignContent$.map(action => ({paramValues: undefined, origin: 'designContent', error: undefined})),
   actions$.updateDesignFromParams$.map(action => action.data)
@@ -162,7 +173,7 @@ domSink(outToDom$)
 
 // for viewer
 
-/*viewerActions
+/* viewerActions
   .toggleGrid$
   .forEach(params => {
     console.log('changing viewer params', params)
