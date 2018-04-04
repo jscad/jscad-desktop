@@ -20,8 +20,8 @@
     "release-major": "git checkout master && git pull origin master && npm version major"
   },
   "dependencies": {
-    "@jscad/core": "0.2.0",
     "@jscad/amf-serializer": "0.1.1",
+    "@jscad/core": "0.2.0",
     "@jscad/csg": "0.5.3",
     "@jscad/csg-viewer": "github:jscad/csg-viewer",
     "@jscad/dxf-serializer": "0.1.2",
@@ -42,6 +42,7 @@
     "esprima": "^4.0.0",
     "esprima-ast-utils": "0.0.7",
     "estraverse": "^4.2.0",
+    "jscad-tree-experiment": "github:kaosat-dev/jscad-tree-experiments",
     "morphdom": "^2.3.3",
     "most": "^1.7.2",
     "most-proxy": "^3.3.0",
