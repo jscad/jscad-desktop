@@ -92,7 +92,10 @@ const actions = (sources) => {
         } catch (error) {
           return {error}
         }
-      })
+      }),
+    sources.store
+      .map(data => data.design.parameters)
+      .filter(parameters => parameters !== undefined)
   ])
       .map(data => ({type: 'setDesignParams', data}))
 

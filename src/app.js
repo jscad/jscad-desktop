@@ -45,13 +45,18 @@ titleBarSink(
 electronStoreSink(state$
   .map(function (state) {
     const {themeName, design} = state
-    const {name, mainPath, vtreeMode} = design
+    const {name, mainPath, vtreeMode, paramDefinitions, paramDefaults, paramValues} = design
     return {
       themeName,
       design: {
         name,
         mainPath,
-        vtreeMode
+        vtreeMode,
+        parameters: {
+          paramDefinitions,
+          paramDefaults,
+          paramValues
+        }
       },
       viewer: {
         axes: {show: state.viewer.axes.show},
