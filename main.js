@@ -24,7 +24,8 @@ function createWindow () {
     offscreen: true,
     webPreferences: {
       nodeIntegrationInWorker: true
-    }
+    },
+    icon: path.join(__dirname, 'assets/icons/icon.png')
   }
   mainWindow = new BrowserWindow(options)
 
