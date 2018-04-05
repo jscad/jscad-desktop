@@ -70,12 +70,12 @@
     "mac": {
       "category": "public.app-category.graphics-design",
       "fileAssociations": [
-      {
-        "ext": "jscad",
-        "name": "jscad",
-        "role": "editor"
-      }
-    ]
+        {
+          "ext": "jscad",
+          "name": "jscad",
+          "role": "editor"
+        }
+      ]
     },
     "linux": {
       "target": "AppImage",
