@@ -6,6 +6,7 @@ function dom (state, paramsCallbacktoStream) {
     .map(function ({name, displayName}) {
       return html`<option value=${name} selected='${state.exportFormat === name}'>${displayName}</option>`
     })
+  const exportAvailable = state.availableExportFormats.length > 0
 
   const {paramValues, paramDefinitions} = state.design
   const {controls} = createParamControls(paramValues, paramDefinitions, paramsCallbacktoStream.callback)
@@ -31,7 +32,7 @@ function dom (state, paramsCallbacktoStream) {
           <input type="button" value="load jscad (.js or .jscad) file" id="fileLoader"/>
           <label for="autoReload">Auto reload</label>
             <input type="checkbox" id="autoReload" checked=${state.autoReload}/>
-          <span id='exports'>
+          <span id='exports' style='visibility:${exportAvailable ? 'visible' : 'hidden'}'>
             <select id='exportFormats'>
             ${formatsList}
             </select>
