@@ -1,4 +1,8 @@
 {
+  "language":"langue",
+  "english":"anglais",
+  "german":"allemand",
+  "french":"français",
   "see":"voir",
   "grid": "grille",
   "axes":"axes",

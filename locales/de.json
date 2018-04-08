@@ -1,4 +1,8 @@
 {
+  "language": "Sprache",
+  "english":"englisch",
+  "german":"deutsch",
+  "french":"französich",
   "see":"sehe",
   "grid": "gitter",
   "axes":"achsen",
