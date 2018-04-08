@@ -3,6 +3,16 @@ const html = require('bel')
 module.exports = function options (state, i18n) {
   return html`
 <section id='options' style='visibility:${state.showOptions ? 'visible' : 'hidden'}; color:${state.themeSettings.secondaryTextColor}'>   
+  <br>
+  <fieldset>
+    <legend> <h3> ${i18n`language`}</legend>
+    <select id='languageSwitcher'>
+      <option value='en-GB' selected=${state.locale === 'en-GB'}>${i18n`english`}</option>
+      <option value='fr-FR' selected=${state.locale === 'fr-FR'}>${i18n`french`}</option>
+      <option value='de-DE' selected=${state.locale === 'de-DE'}>${i18n`german`}</option>
+    </select>
+  </fieldset>
+
   <fieldset>
     <legend> <h3> ${i18n`theme`} </h3> </legend>
     <select id='themeSwitcher'>
