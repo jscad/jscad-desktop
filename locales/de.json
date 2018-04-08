@@ -1,0 +1,18 @@
+{
+  "see":"sehe",
+  "grid": "gitter",
+  "axes":"achsen",
+  "autorotate": "auto drehung",
+  "auto reload": "auto laden",
+  "storage": "speicher",
+  "export":"exportieren",
+  "load jscad (.js or .jscad) file":"jscad (.js oder .jscad) datei laden",
+  "timeout for solids generation": "Abfallzeit für generieren von Soliden",
+  "geometry generation": "generieren von Geometrie",
+  "experimental geometry caching":"experimenteles caching von Geometrie",
+  "zoom to fit on new parameters":"Alles Zoom bei neue Parameter",
+  "zoom to fit on design load":"Alles Zoom beim laden von Designs",
+  "settings storage path":"Dateipfad für Einstellungen",
+  "(not settable)": "(nicht verränderbar)",
+  "theme": "Thema"
+}

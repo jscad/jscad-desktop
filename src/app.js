@@ -15,6 +15,8 @@ const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
 const {domSink, domSource} = require('./sideEffects/dom')
 const makeWorkerEffect = require('./sideEffects/worker')
 const {appUpdateSource} = require('./sideEffects/appUpdates')
+const makei18nSideEffect = require('./sideEffects/i18n')
+const {i18nSink, i18nSource} = makei18nSideEffect()
 
 const solidWorker = makeWorkerEffect('src/core/code-evaluation/rebuildSolidsWorker.js')
 const paramsCallbacktoStream = require('./utils/observable-utils/callbackToObservable')()
@@ -22,7 +24,6 @@ const paramsCallbacktoStream = require('./utils/observable-utils/callbackToObser
 // proxy state stream to be able to access & manipulate it before it is actually available
 const { attach, stream } = proxy()
 const state$ = stream
-//
 
 // appUpdateSource().forEach(x => console.log('update available', x))
 
@@ -49,30 +50,34 @@ attach(makeState(Object.values(actions$)))
 titleBarSink(
   state$.map(state => state.appTitle).skipRepeats()
 )
-electronStoreSink(state$
-  .map(function (state) {
-    const {themeName, design} = state
-    const {name, mainPath, vtreeMode, paramDefinitions, paramDefaults, paramValues} = design
-    return {
-      themeName,
-      design: {
-        name,
-        mainPath,
-        vtreeMode,
-        parameters: {
-          paramDefinitions,
-          paramDefaults,
-          paramValues
-        }
-      },
-      viewer: {
-        axes: {show: state.viewer.axes.show},
-        grid: {show: state.viewer.grid.show}
-      },
-      autoReload: state.autoReload,
-      instantUpdate: state.instantUpdate
-    }
-  })
+
+//
+const settingsStorage = state => {
+  const {themeName, design} = state
+  const {name, mainPath, vtreeMode, paramDefinitions, paramDefaults, paramValues} = design
+  return {
+    themeName,
+    design: {
+      name,
+      mainPath,
+      vtreeMode,
+      parameters: {
+        paramDefinitions,
+        paramDefaults,
+        paramValues
+      }
+    },
+    viewer: {
+      axes: {show: state.viewer.axes.show},
+      grid: {show: state.viewer.grid.show}
+    },
+    autoReload: state.autoReload,
+    instantUpdate: state.instantUpdate
+  }
+}
+electronStoreSink(
+  state$
+   .map(settingsStorage)
 )
 // data out to file watcher
 watcherSink(
@@ -175,8 +180,10 @@ const outToDom$ = state$
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
       sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates
   })
-  .map(state => require('./ui/views/main')(state, paramsCallbacktoStream))
-
+  .map(state => {
+    const i18n = i18nSource()
+    return require('./ui/views/main')(state, paramsCallbacktoStream, i18n)
+  })
 domSink(outToDom$)
 
 // for viewer

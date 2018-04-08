@@ -1,0 +1,18 @@
+{
+  "see":"voir",
+  "grid": "grille",
+  "axes":"axes",
+  "autorotate": "auto rotation",
+  "auto reload": "auto chargement",
+  "storage": "stockage",
+  "export":"exporter",
+  "load jscad (.js or .jscad) file":"charger données (.js ou .jscad)",
+  "timeout for solids generation": "timeout génération de solides",
+  "geometry generation": "génération de géometrie",
+  "experimental geometry caching":"systeme de cache experimental de la geometrie",
+  "zoom to fit on new parameters":"zoom adapté lors de nouveaux paramètres",
+  "zoom to fit on design load":"zoom adapté lors de chargement de design",
+  "settings storage path":"chemin de stockage des paramètres",
+  "(not settable)": "(non modifiable)",
+  "theme": "theme"
+}
