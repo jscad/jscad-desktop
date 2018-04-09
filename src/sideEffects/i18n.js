@@ -37,11 +37,19 @@ module.exports = getTranslations = (translationPaths) => {
 }
 */
 
-const de = require('../../locales/de.json')
-const en = require('../../locales/en.json')
-const fr = require('../../locales/fr.json')
+
 
 const makei18nSideEffect = (options) => {
+  const de = require('../../locales/de.json')
+  const en = require('../../locales/en.json')
+  const fr = require('../../locales/fr.json')
+
+  const localesMap = {
+    'en': en,
+    'en-GB': en,
+    'de-DE': de,
+    'fr-FR': fr
+  }
   /*i18nConfig({
     locales: 'en-US',
     translations: de
@@ -63,10 +71,10 @@ const makei18nSideEffect = (options) => {
     const changeSettings$ = obs$
       .filter(x => x.cmd === 'changeSettings')
   }
-  const i18nSource = () => {
+  const i18nSource = (locales) => {
     i18nConfig({
-      locales: 'de-DE',
-      translations: de//fr//de
+      locales,
+      translations: localesMap[locales]
     })
     return i18n
   }

@@ -53,10 +53,11 @@ titleBarSink(
 
 //
 const settingsStorage = state => {
-  const {themeName, design} = state
+  const {themeName, design, locale} = state
   const {name, mainPath, vtreeMode, paramDefinitions, paramDefaults, paramValues} = design
   return {
     themeName,
+    locale,
     design: {
       name,
       mainPath,
@@ -69,7 +70,8 @@ const settingsStorage = state => {
     },
     viewer: {
       axes: {show: state.viewer.axes.show},
-      grid: {show: state.viewer.grid.show}
+      grid: {show: state.viewer.grid.show},
+      // autorotate: {enabled: state.viewer.controls.autoRotate.enabled}
     },
     autoReload: state.autoReload,
     instantUpdate: state.instantUpdate
@@ -177,11 +179,15 @@ const outToDom$ = state$
 
     const sameAppUpdates = JSON.stringify(state.appUpdates) === JSON.stringify(previousState.appUpdates)
 
+    const sameLocale = state.locale === previousState.locale
+
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
-      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates
+      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates &&
+      sameLocale
   })
   .map(state => {
-    const i18n = i18nSource()
+    console.log('here', state.locale)
+    const i18n = i18nSource(state.locale)
     return require('./ui/views/main')(state, paramsCallbacktoStream, i18n)
   })
 domSink(outToDom$)

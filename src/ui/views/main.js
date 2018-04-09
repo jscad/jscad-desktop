@@ -13,10 +13,6 @@ function dom (state, paramsCallbacktoStream, i18n) {
   const parameters = require('./designParameters')(state, paramsCallbacktoStream)
   const status = require('./status')(state, i18n)
 
-  console.log(i18n`hi`)
-  console.log(i18n`${new Date()}:t(D)`)
-  console.log(i18n`Storage`)
-
   const output = html`
     <div id='container' style='color:${state.themeSettings.mainTextColor}'>
       <header>
@@ -48,9 +44,9 @@ function dom (state, paramsCallbacktoStream, i18n) {
       <!--Ui Controls-->
       <div id='controls'>
         <label for="grid">${i18n`grid`}</label>
-          <input type="checkbox" id="grid" checked=${state.viewer.grid.show}/>
+          <input type="checkbox" id="grid" checked=${state.viewer.grid.show} />
         <label for="toggleAxes">${i18n`axes`}</label>
-          <input type="checkbox" id="toggleAxes" checked=${state.viewer.axes.show}/>
+          <input type="checkbox" id="toggleAxes" checked=${state.viewer.axes.show} />
         <label for="autoRotate">${i18n`autorotate`}</label>
           <input type="checkbox" id="autoRotate"/>
       </div>

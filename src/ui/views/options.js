@@ -16,8 +16,8 @@ module.exports = function options (state, i18n) {
   <fieldset>
     <legend> <h3> ${i18n`theme`} </h3> </legend>
     <select id='themeSwitcher'>
-      <option value='dark' selected=${state.themeName === 'dark'}>${state.themeName}</option>
-      <option value='light' selected=${state.themeName === 'light'}>${state.themeName}</option>
+      <option value='dark' selected=${state.themeName === 'dark'}>dark</option>
+      <option value='light' selected=${state.themeName === 'light'}>light</option>
     </select>
   </fieldset>
 
