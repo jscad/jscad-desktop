@@ -4,7 +4,7 @@ const packageMetadata = require('../package.json')
 const initialState = {
   appTitle: `jscad v ${packageMetadata.version}`,
   appUpdates: {available: false, version: undefined},
-  locale: require('electron').remote.app.getLocale(),
+  locale: require('electron').remote.app.getLocale().split('-')[0],
   // for possible errors
   error: undefined,
   // design data

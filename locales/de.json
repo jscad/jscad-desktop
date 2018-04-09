@@ -17,6 +17,10 @@
   "zoom to fit on new parameters":"Alles Zoom bei neue Parameter",
   "zoom to fit on design load":"Alles Zoom beim laden von Designs",
   "settings storage path":"Dateipfad für Einstellungen",
+  "3d viewer": "3d viewer",
   "(not settable)": "(nicht verränderbar)",
-  "theme": "Thema"
+  "theme": "Thema",
+  "STL (Binary)":"STL (binär)",
+  "STL (ASCII)":"STL (ASCII)",
+  "AMF (experimental)":"AMF (experimentell)"
 }

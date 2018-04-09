@@ -3,7 +3,10 @@ const html = require('bel')
 function dom (state, paramsCallbacktoStream, i18n) {
   const formatsList = state.availableExportFormats
     .map(function ({name, displayName}) {
-      return html`<option value=${name} selected='${state.exportFormat === name}'>${displayName}</option>`
+      displayName = i18n.translate(displayName)
+      return html`<option value=${name} selected='${state.exportFormat === name}'>
+        ${displayName}
+      </option>`
     })
   const exportAvailable = state.availableExportFormats.length > 0
 

@@ -7,9 +7,9 @@ module.exports = function options (state, i18n) {
   <fieldset>
     <legend> <h3> ${i18n`language`}</legend>
     <select id='languageSwitcher'>
-      <option value='en-GB' selected=${state.locale === 'en-GB'}>${i18n`english`}</option>
-      <option value='fr-FR' selected=${state.locale === 'fr-FR'}>${i18n`french`}</option>
-      <option value='de-DE' selected=${state.locale === 'de-DE'}>${i18n`german`}</option>
+      <option value='en' selected=${state.locale === 'en'}>${i18n`english`}</option>
+      <option value='fr' selected=${state.locale === 'fr'}>${i18n`french`}</option>
+      <option value='de' selected=${state.locale === 'de'}>${i18n`german`}</option>
     </select>
   </fieldset>
 

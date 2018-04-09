@@ -1,7 +1,7 @@
 const html = require('bel')
 const {createParamControls} = require('./createParameterControls3')
 
-module.exports = function designParameters (state, paramsCallbacktoStream) {
+module.exports = function designParameters (state, paramsCallbacktoStream, i18n) {
   const {paramValues, paramDefinitions} = state.design
 
   const {controls} = createParamControls(paramValues, paramDefinitions, paramsCallbacktoStream.callback)
@@ -14,7 +14,7 @@ module.exports = function designParameters (state, paramsCallbacktoStream) {
           </table>
         </span>
         <span id='paramsControls'>
-          <button id='updateDesignFromParams'>Update</button>
+          <button id='updateDesignFromParams'>${i18n`update`}</button>
           <label for='instantUpdate'>Instant Update</label>
           <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
         </span>
