@@ -15,7 +15,7 @@ module.exports = function designParameters (state, paramsCallbacktoStream, i18n)
         </span>
         <span id='paramsControls'>
           <button id='updateDesignFromParams'>${i18n`update`}</button>
-          <label for='instantUpdate'>Instant Update</label>
+          <label for='instantUpdate'>${i18n`instant update`}</label>
           <input type='checkbox' checked='${state.instantUpdate}' id='instantUpdate'/>
         </span>
       </section>

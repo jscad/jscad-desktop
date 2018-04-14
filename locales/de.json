@@ -22,5 +22,7 @@
   "theme": "Thema",
   "STL (Binary)":"STL (binär)",
   "STL (ASCII)":"STL (ASCII)",
-  "AMF (experimental)":"AMF (experimentell)"
+  "AMF (experimental)":"AMF (experimentell)",
+  "update":"aktualisieren",
+  "instant update":"automatisch aktualisieren"
 }
