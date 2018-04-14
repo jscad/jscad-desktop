@@ -100,9 +100,9 @@ fs.sink(
         operation: 'watch',
         id: 'watchScript',
         path,
-        options: {enabled}})
-      ), // enable/disable watch if autoreload is set to false
-      //
+        options: {enabled}})// enable/disable watch if autoreload is set to false
+      ),
+    // files to read/write
     state$
       .filter(state => state.design.mainPath !== '')
       .map(state => state.design.mainPath)
