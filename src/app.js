@@ -10,8 +10,6 @@ const titleBar = require('./sideEffects/titleBar')()
 const electronStore = require('./sideEffects/electronStore')()
 // drag & drop side effect
 const dragDrop = require('./sideEffects/dragDrop')()
-// file watcher side effect : TODO: merge with fs
-const watcher = require('./sideEffects/fileWatcher')()
 // file system side effect
 const fs = require('./sideEffects/fs')()
 // dom side effect
@@ -33,12 +31,11 @@ const state$ = stream
 
 // all the sources of data
 const sources = {
-  store: electronStore.source(),
-  drops: dragDrop.source(document),
-  watcher: watcher.source(),
-  fs: fs.source(),
-  paramChanges: paramsCallbacktoStream.stream,
   state$,
+  paramChanges: paramsCallbacktoStream.stream,
+  store: electronStore.source(),
+  fs: fs.source(),
+  drops: dragDrop.source(document),
   dom: dom.source(),
   solidWorker: solidWorker.source(),
   appUpdates: appUpdates.source()
@@ -88,20 +85,30 @@ electronStore.sink(
   state$
     .map(settingsStorage)
 )
-// data out to file watcher
-watcher.sink(
-  state$
-    .filter(state => state.design.mainPath !== '')
-    .skipRepeats()
-    .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload})) // enable/disable watch if autoreload is set to false
-)
+
 // data out to file system sink
 fs.sink(
   most.mergeArray([
+    // watched data
+    state$
+      .filter(state => state.design.mainPath !== '')
+      .map(state => ({path: state.design.mainPath, enabled: state.autoReload}))
+      .skipRepeatsWith((state, previousState) => {
+        return JSON.stringify(state) === JSON.stringify(previousState)
+      })
+      .map(({path, enabled}) => ({
+        operation: 'watch',
+        id: 'watchScript',
+        path,
+        options: {enabled}})
+      ), // enable/disable watch if autoreload is set to false
+      //
     state$
       .filter(state => state.design.mainPath !== '')
       .map(state => state.design.mainPath)
-      .skipRepeats()
+      .skipRepeatsWith((state, previousState) => {
+        return JSON.stringify(state) === JSON.stringify(previousState)
+      })
       .map(path => ({operation: 'read', id: 'loadScript', path})),
     most.just()
       .map(function () {
