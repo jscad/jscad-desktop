@@ -10,7 +10,7 @@
   "auto reload": "auto laden",
   "storage": "speicher",
   "export":"exportieren",
-  "load jscad (.js or .jscad) file":"jscad (.js oder .jscad) datei laden",
+  "load jscad project":"jscad Projekt laden",
   "timeout for solids generation": "Abfallzeit für generieren von Soliden",
   "geometry generation": "generieren von Geometrie",
   "experimental geometry caching":"experimenteles caching von Geometrie",
