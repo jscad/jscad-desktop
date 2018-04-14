@@ -115,4 +115,6 @@ function watcherSource () {
     .multicast()
 }
 
-module.exports = {watcherSink, watcherSource}
+module.exports = function makeWatcherSideEffect () {
+  return {sink: watcherSink, source: watcherSource}
+}

@@ -5,39 +5,45 @@ const makeCsgViewer = require('@jscad/csg-viewer')
 let csgViewer
 
 // all the side effects : ie , input/outputs
-const {electronStoreSink, electronStoreSource} = require('./sideEffects/electronStore')
-const {titleBarSink} = require('./sideEffects/titleBar')
-const makeDragDropSource = require('./sideEffects/dragDrop')
-const storeSource$ = electronStoreSource()
-const dragAndDropSource$ = makeDragDropSource(document)
-const {watcherSink, watcherSource} = require('./sideEffects/fileWatcher')
-const {fsSink, fsSource} = require('./sideEffects/fsWrapper')
-const {domSink, domSource} = require('./sideEffects/dom')
+const titleBar = require('./sideEffects/titleBar')()
+// electron store side effect
+const electronStore = require('./sideEffects/electronStore')()
+// drag & drop side effect
+const dragDrop = require('./sideEffects/dragDrop')()
+// file watcher side effect : TODO: merge with fs
+const watcher = require('./sideEffects/fileWatcher')()
+// file system side effect
+const fs = require('./sideEffects/fs')()
+// dom side effect
+const dom = require('./sideEffects/dom')()
+// worker side effect
 const makeWorkerEffect = require('./sideEffects/worker')
-const {appUpdateSource} = require('./sideEffects/appUpdates')
-const makei18nSideEffect = require('./sideEffects/i18n')
-const {i18nSink, i18nSource} = makei18nSideEffect()
-
+// app updates side effect
+const appUpdates = require('./sideEffects/appUpdates')()
+// internationalization side effect
+const i18n = require('./sideEffects/i18n')()
+// web workers
 const solidWorker = makeWorkerEffect('src/core/code-evaluation/rebuildSolidsWorker.js')
+// generic design parameter handling
 const paramsCallbacktoStream = require('./utils/observable-utils/callbackToObservable')()
 
 // proxy state stream to be able to access & manipulate it before it is actually available
 const { attach, stream } = proxy()
 const state$ = stream
 
-// appUpdateSource().forEach(x => console.log('update available', x))
-
+// all the sources of data
 const sources = {
-  store: storeSource$,
-  drops: dragAndDropSource$,
-  watcher: watcherSource(),
-  fs: fsSource(),
+  store: electronStore.source(),
+  drops: dragDrop.source(document),
+  watcher: watcher.source(),
+  fs: fs.source(),
   paramChanges: paramsCallbacktoStream.stream,
   state$,
-  dom: domSource(),
+  dom: dom.source(),
   solidWorker: solidWorker.source(),
-  appUpdates: appUpdateSource()
+  appUpdates: appUpdates.source()
 }
+// all the actions
 const designActions = require('./ui/design/actions')(sources)
 const ioActions = require('./ui/io/actions')(sources)
 const viewerActions = require('./ui/viewer/actions')(sources)
@@ -48,7 +54,7 @@ attach(makeState(Object.values(actions$)))
 
 // after this point, formating of data data that goes out to the sink side effects
 // titlebar & store side effects
-titleBarSink(
+titleBar.sink(
   state$.map(state => state.appTitle).skipRepeats()
 )
 
@@ -78,19 +84,19 @@ const settingsStorage = state => {
     instantUpdate: state.instantUpdate
   }
 }
-electronStoreSink(
+electronStore.sink(
   state$
-   .map(settingsStorage)
+    .map(settingsStorage)
 )
 // data out to file watcher
-watcherSink(
+watcher.sink(
   state$
     .filter(state => state.design.mainPath !== '')
     .skipRepeats()
     .map(state => ({filePath: state.design.mainPath, enabled: state.autoReload})) // enable/disable watch if autoreload is set to false
 )
 // data out to file system sink
-fsSink(
+fs.sink(
   most.mergeArray([
     state$
       .filter(state => state.design.mainPath !== '')
@@ -109,11 +115,11 @@ fsSink(
   ])
 )
 
-i18nSink(
+i18n.sink(
   state$
     .map(state => state.locale)
     .skipRepeats()
-    .map(data => ({cmd: 'changeSettings', data}))
+    .map(data => ({operation: 'changeSettings', data}))
 )
 
 // web worker sink
@@ -195,9 +201,9 @@ const outToDom$ = state$
   })
   .combine(function (state, i18n) {
     return require('./ui/views/main')(state, paramsCallbacktoStream, i18n)
-  }, i18nSource())
+  }, i18n.source())
 
-domSink(outToDom$)
+dom.sink(outToDom$)
 
 // for viewer
 

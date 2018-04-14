@@ -26,7 +26,6 @@ function fsSource () {
   return readFileToCB.stream.multicast()
 }
 
-module.exports = {
-  fsSink,
-  fsSource
+module.exports = function makeFsSideEffects () {
+  return {sink: fsSink, source: fsSource}
 }

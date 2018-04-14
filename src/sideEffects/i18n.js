@@ -38,9 +38,9 @@ const {i18nConfig} = i18nImport
 const makei18nSideEffect = (options) => {
   const translationsCB = callBackToStream()
 
-  const i18nSink = (obs$) => {
+  const sink = (obs$) => {
     const changeSettings$ = obs$
-      .filter(x => x.cmd === 'changeSettings')
+      .filter(x => x.operation === 'changeSettings')
       .multicast()
 
     changeSettings$
@@ -53,7 +53,7 @@ const makei18nSideEffect = (options) => {
         translationsCB.callback(i18n)
       })
   }
-  const i18nSource = () => {
+  const source = () => {
     // setup defaults
     const locales = require('electron').remote.app.getLocale().split('-')[0]
     i18nConfig({
@@ -64,7 +64,7 @@ const makei18nSideEffect = (options) => {
       .startWith(i18n)
       .multicast()
   }
-  return {i18nSink, i18nSource}
+  return {sink, source}
 }
 
 module.exports = makei18nSideEffect
