@@ -201,10 +201,11 @@ const outToDom$ = state$
 
     const sameAppUpdates = JSON.stringify(state.appUpdates) === JSON.stringify(previousState.appUpdates)
 
-    // const sameLocale = state.locale === previousState.locale
+    const sameLocale = state.locale === previousState.locale
 
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
-      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates
+      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates &&
+      sameLocale
   })
   .combine(function (state, i18n) {
     return require('./ui/views/main')(state, paramsCallbacktoStream, i18n)
