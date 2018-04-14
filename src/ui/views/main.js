@@ -1,6 +1,10 @@
 const html = require('bel')
 
 function dom (state, paramsCallbacktoStream, i18n) {
+  const i18nFake = x => x
+  i18nFake.translate = x => x
+  i18n = i18n || i18nFake
+
   const formatsList = state.availableExportFormats
     .map(function ({name, displayName}) {
       displayName = i18n.translate(displayName)
@@ -15,6 +19,7 @@ function dom (state, paramsCallbacktoStream, i18n) {
   const options = require('./options')(state, i18n)
   const parameters = require('./designParameters')(state, paramsCallbacktoStream, i18n)
   const status = require('./status')(state, i18n)
+  const viewer = require('./viewer')(state, i18n)
 
   const output = html`
     <div id='container' style='color:${state.themeSettings.mainTextColor}'>
@@ -28,7 +33,7 @@ function dom (state, paramsCallbacktoStream, i18n) {
         <section>
         </section>
         <section>
-          <input type="button" value="${i18n`load jscad (.js or .jscad) file`}" id="fileLoader"/>
+          <input type="button" value="${i18n`load jscad project`}" id="fileLoader"/>
           <label for="autoReload">${i18n`auto reload`}</label>
             <input type="checkbox" id="autoReload" checked=${state.autoReload}/>
           <span id='exports' style='visibility:${exportAvailable ? 'visible' : 'hidden'}'>
@@ -66,8 +71,8 @@ function dom (state, paramsCallbacktoStream, i18n) {
       <!--Options-->
       ${options}
 
-      <canvas id='renderTarget'> </canvas>
-      
+      <!--Viewer-->
+      ${viewer}
     </div>
   `
   return output

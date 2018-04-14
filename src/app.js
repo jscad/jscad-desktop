@@ -46,6 +46,7 @@ const actions$ = Object.assign({}, designActions, otherActions, ioActions, viewe
 
 attach(makeState(Object.values(actions$)))
 
+// after this point, formating of data data that goes out to the sink side effects
 // titlebar & store side effects
 titleBarSink(
   state$.map(state => state.appTitle).skipRepeats()
@@ -70,7 +71,7 @@ const settingsStorage = state => {
     },
     viewer: {
       axes: {show: state.viewer.axes.show},
-      grid: {show: state.viewer.grid.show},
+      grid: {show: state.viewer.grid.show}
       // autorotate: {enabled: state.viewer.controls.autoRotate.enabled}
     },
     autoReload: state.autoReload,
@@ -108,6 +109,14 @@ fsSink(
   ])
 )
 
+i18nSink(
+  state$
+    .map(state => state.locale)
+    .skipRepeats()
+    .map(data => ({cmd: 'changeSettings', data}))
+)
+
+// web worker sink
 const solidWorkerBase$ = most.mergeArray([
   actions$.setDesignContent$.map(action => ({paramValues: undefined, origin: 'designContent', error: undefined})),
   actions$.updateDesignFromParams$.map(action => action.data)
@@ -179,17 +188,15 @@ const outToDom$ = state$
 
     const sameAppUpdates = JSON.stringify(state.appUpdates) === JSON.stringify(previousState.appUpdates)
 
-    const sameLocale = state.locale === previousState.locale
+    // const sameLocale = state.locale === previousState.locale
 
     return sameParamDefinitions && sameParamValues && sameExportFormats && sameStatus && sameStyling &&
-      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates &&
-      sameLocale
+      sameAutoreload && sameInstantUpdate && sameError && sameShowOptions && samevtreeMode && sameAppUpdates
   })
-  .map(state => {
-    console.log('here', state.locale)
-    const i18n = i18nSource(state.locale)
+  .combine(function (state, i18n) {
     return require('./ui/views/main')(state, paramsCallbacktoStream, i18n)
-  })
+  }, i18nSource())
+
 domSink(outToDom$)
 
 // for viewer
@@ -212,12 +219,11 @@ domSink(outToDom$)
 state$
   .map(state => state.viewer)
   .skipRepeatsWith(function (state, previousState) {
-    return JSON.parse(JSON.stringify(state)) === JSON.parse(JSON.stringify(previousState))
+    const sameViewerParams = JSON.stringify(state) === JSON.stringify(previousState)
+    return sameViewerParams
   })
   .forEach(params => {
-    // console.log('changing viewer params')
     const viewerElement = document.getElementById('renderTarget')
-    setCanvasSize(viewerElement)
     // initialize viewer if it has not been done already
     if (viewerElement && !csgViewer) {
       const csgViewerItems = makeCsgViewer(viewerElement, params)
@@ -227,25 +233,3 @@ state$
       csgViewer(params)
     }
   })
-
-function setCanvasSize (viewerElement) {
-  let pixelRatio = window.devicePixelRatio || 1
-  let width = window.innerWidth
-  let height = window.innerHeight
-  if (viewerElement !== document.body) {
-    const bounds = viewerElement.getBoundingClientRect()
-    width = bounds.right - bounds.left
-    height = bounds.bottom - bounds.top
-  }
-  width *= pixelRatio
-  height *= pixelRatio
-  viewerElement.width = width
-  viewerElement.height = height
-  viewerElement.clientWidth = width
-  viewerElement.clientHeight = height
-  // viewerElement.style.width = width + 'px'
-  // viewerElement.style.height = height + 'px'
-}
-window.onresize = function () {
-  setCanvasSize(document.getElementById('renderTarget'))
-}
