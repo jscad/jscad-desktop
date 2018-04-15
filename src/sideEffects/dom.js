@@ -2,8 +2,6 @@ const most = require('most')
 const morph = require('morphdom')// require('nanomorph')
 const {proxy} = require('most-proxy')
 const { attach, stream } = proxy()
-// const {holdSubject} = require('../../node_modules/csg-viewer/')
-// require('../observable-utils/most-subject/index')
 
 const out$ = stream
 function domSink (outToDom$) {
@@ -36,17 +34,16 @@ let storedListeners = {
 
 }
 function domSource () {
-  function getElement (query) {
-    let item = document.querySelectorAll(query)
-    return item
+  function getElements (query) {
+    return Array.from(document.querySelectorAll(query))
   }
 
   const select = function (query) {
     // console.log('selecting', query)
-    const item = getElement(query)
+    const items = getElements(query)
 
     let outputStream
-    if (!item || (item && item.length === 0)) {
+    if (!items || (items && items.length === 0)) {
       const eventProxy = proxy()
       outputStream = eventProxy.stream
       storedListeners[query] = {observable: eventProxy, live: false}
@@ -62,14 +59,19 @@ function domSource () {
   out$.forEach(function () {
     // console.log('dom source watching dom change')
     Object.keys(storedListeners).forEach(function (query) {
-      const item = getElement(query)
-      if (item) {
+      const items = getElements(query)
+      // console.log('fooo', items)
+      if (items && items.length > 0) {
         const storedListener = storedListeners[query]
-        if (item.length === 1 && storedListener.live === false) {
-          // console.log('HURRAY NOW I HAVE SOMETHING !!')
-          const realObservable = most.fromEvent(storedListener.events, item[0])
-          storedListener.observable.attach(realObservable)
+        if (storedListener.live === false) {
           storedListener.live = true
+
+          const itemObs = items.map(item => {
+            // console.log('HURRAY NOW I HAVE SOMETHING !!')
+            return most.fromEvent(storedListener.events, item)   
+          })
+          const realObservable = most.mergeArray(itemObs)
+          storedListener.observable.attach(realObservable)
         }
       }
     })

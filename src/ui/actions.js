@@ -46,6 +46,58 @@ const makeActions = (sources) => {
   }, keyDowns$, keyDowns$, sources.state$)
     .filter(x => x !== undefined)
 
+  // set shortcuts
+  const setShortcuts$ = most.mergeArray([
+    sources.store
+      .filter(data => data && data.shortcuts)
+      .map(data => data.shortcuts)
+  ])
+  .map(data => ({type: 'setShortcuts', data}))
+
+  // set a specific shortcut
+  const shortcutCommandKey$ = sources.dom.select('.shortcutCommand').events('keyup').multicast()
+  shortcutCommandKey$
+    .forEach(event => {
+      event.preventDefault()
+      event.stopPropagation()
+      return false
+    })
+  const setShortcut$ = most.mergeArray([
+    shortcutCommandKey$
+    .map(event => {
+      const compositeKey = compositeKeyFromKeyEvent(event)
+      return {
+        key: compositeKey,
+        command: event.target.dataset.command,
+        args: event.target.dataset.args
+      }
+    })
+    .loop((values, x) => {
+      console.log('looping', values, x)
+      if (!Array.isArray(values)) {
+        values = []
+      }
+      values.push(x)
+      if (x.key === 'enter') {
+        values = values.slice(0, -1)
+          .reduce((acc, cur) => {
+            return Object.assign({}, acc, {key: `${acc.key}+${cur.key}`})
+          })
+        return {seed: values, value: values}
+      }
+      return {seed: values}
+    }, [])
+    .filter(x => x !== undefined)
+
+  ])
+  .map(data => ({type: 'setShortcut', data}))
+  .multicast()
+
+  // sources.dom.select('.shortcutCommand').events('keydown')
+  //
+  // setShortcut$.forEach(event => event.preventDefault)
+  setShortcut$.forEach(x => console.log('shortcutCommand', x))
+
   const changeTheme$ = most.mergeArray([
     sources.dom.select('#themeSwitcher').events('change')
       .map(e => e.target.value),
@@ -105,6 +157,9 @@ const makeActions = (sources) => {
   return {
     // generic key shortuct handler
     actionsFromKey$,
+    // set shortcut(s)
+    setShortcuts$,
+    setShortcut$,
     // generic clear error action
     clearErrors$,
     setErrors$,

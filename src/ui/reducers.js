@@ -12,6 +12,25 @@ const changeTheme = (state, themeName) => {
   return Object.assign({}, state, {viewer, themeName, themeSettings: themeData})
 }
 
+// set all shortcuts
+const setShortcuts = (state, shortcuts) => {
+  return Object.assign({}, state, {shortcuts})
+}
+
+// set a specific shortcut
+const setShortcut = (state, shortcutData) => {
+  console.log('setShortcut', shortcutData)
+  const shortcuts = state.shortcuts.map(shortcut => {
+    const match = shortcut.command === shortcutData.command && shortcut.args === shortcutData.args
+    if (!match) {
+      return shortcut
+    } else {
+      return Object.assign({}, shortcut, {key: shortcutData.key})
+    }
+  })
+  return Object.assign({}, state, {shortcuts})
+}
+
 const changeLanguage = (state, locale) => {
   return Object.assign({}, state, {locale})
 }
@@ -40,6 +59,8 @@ const setAppUpdatesAvailable = (state, {version, available}) => {
 
 module.exports = {
   changeTheme,
+  setShortcuts,
+  setShortcut,
   changeLanguage,
   toggleOptions,
   clearErrors,
