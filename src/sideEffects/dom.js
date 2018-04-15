@@ -43,32 +43,32 @@ function domSource () {
     const items = getElements(query)
 
     let outputStream
-    if (!items || (items && items.length === 0)) {
-      const eventProxy = proxy()
-      outputStream = eventProxy.stream
-      storedListeners[query] = {observable: eventProxy, live: false}
-    }
 
     return {events: function events (eventName) {
+      if (!items || (items && items.length === 0)) {
+        const eventProxy = proxy()
+        outputStream = eventProxy.stream
+        storedListeners[query + '@@' + eventName] = {observable: eventProxy, live: false}
+      }
       // eventsForListners[query] = eventName
-      storedListeners[query].events = eventName
+      storedListeners[query + '@@' + eventName].events = eventName
       return outputStream
     }}
   }
 
   out$.forEach(function () {
     // console.log('dom source watching dom change')
-    Object.keys(storedListeners).forEach(function (query) {
+    Object.keys(storedListeners).forEach(function (queryAndEventName) {
+      const [query, eventName] = queryAndEventName.split('@@')
       const items = getElements(query)
-      // console.log('fooo', items)
       if (items && items.length > 0) {
-        const storedListener = storedListeners[query]
+        const storedListener = storedListeners[queryAndEventName]
         if (storedListener.live === false) {
           storedListener.live = true
 
           const itemObs = items.map(item => {
             // console.log('HURRAY NOW I HAVE SOMETHING !!')
-            return most.fromEvent(storedListener.events, item)   
+            return most.fromEvent(storedListener.events, item)
           })
           const realObservable = most.mergeArray(itemObs)
           storedListener.observable.attach(realObservable)
