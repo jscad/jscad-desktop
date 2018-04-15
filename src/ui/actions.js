@@ -18,32 +18,54 @@ function compositeKeyFromKeyEvent (event) {
   const compositeKey = `${ctrl}${shift}${meta}${key}`
   return compositeKey
 }
+const simpleKey = (event) => {
+  return event.key ? event.key.toLowerCase() : undefined
+}
+
+const getKeyCombos = (keyUps$, keyDown$) => {
+  keyDown$ = keyDown$.multicast().debounce(10)
+    .skipRepeatsWith((event, previousEvent) => {
+      return simpleKey(event) === simpleKey(previousEvent)
+    })
+  const keyStuffEnd$ = keyDown$.throttle(1000).delay(2000)
+  const keyCombos$ = keyDown$
+    .merge(keyUps$.map(x => 'end'))
+    .merge(keyStuffEnd$.map(x => 'end'))
+    .loop((values, event) => {
+      if (event === 'end') {
+        const value = {
+          event: values.length > 0 ? values[0].event : undefined,
+          compositeKey: values.map(x => x.compositeKey).join('+')
+        }
+        return {seed: [], value}
+      } else {
+        const compositeKey = simpleKey(event)
+        values.push({event, compositeKey})
+      }
+      return {seed: values}
+    }, [])
+    .filter(x => x !== undefined)
+    .filter(x => x.event !== undefined)
+    // .tap(x => console.log('key stuff', x))
+    .multicast()
+
+  return keyCombos$
+}
 
 const makeActions = (sources) => {
-  /* sources.watcher.forEach(function (data) {
-    console.log('watchedFile', data)
-  })
-  sources.drops.forEach(function (data) {
-    console.log('drop', data)
-  })
-  sources.fs.forEach(function (data) {
-    console.log('fs operations', data)
-  })
-  sources.paramChanges.forEach(function (data) {
-    console.log('param changes', data)
-  }) */
-
   // keyboard shortcut handling
-  const keyDowns$ = most.fromEvent('keyup', document)
-  const actionsFromKey$ = most.sample(function (event, state) {
-    const compositeKey = compositeKeyFromKeyEvent(event)
+  const keyUps$ = most.fromEvent('keyup', document).multicast()
+  const keyDown$ = most.fromEvent('keydown', document).multicast()
+
+  const keyCombos$ = getKeyCombos(keyUps$, keyDown$)
+  const actionsFromKey$ = most.sample(function ({event, compositeKey}, state) {
     const matchingAction = head(state.shortcuts.filter(shortcut => shortcut.key === compositeKey))
     if (matchingAction) {
       const {command, args} = matchingAction
       return {type: command, data: args}
     }
     return undefined
-  }, keyDowns$, keyDowns$, sources.state$)
+  }, keyCombos$, keyCombos$, sources.state$)
     .filter(x => x !== undefined)
 
   // set shortcuts
@@ -55,38 +77,78 @@ const makeActions = (sources) => {
   .map(data => ({type: 'setShortcuts', data}))
 
   // set a specific shortcut
-  const shortcutCommandKey$ = sources.dom.select('.shortcutCommand').events('keyup').multicast()
+  const shortcutCommandKey$ = getKeyCombos(
+    sources.dom.select('.shortcutCommand').events('keyup').multicast(),
+    sources.dom.select('.shortcutCommand').events('keydown').multicast()
+  )
+  // const shortcutCommandKey$ = sources.dom.select('.shortcutCommand').events('keyup').multicast()
   shortcutCommandKey$
-    .forEach(event => {
+    .forEach(({event}) => {
       event.preventDefault()
       event.stopPropagation()
       return false
     })
   const setShortcut$ = most.mergeArray([
     shortcutCommandKey$
-    .map(event => {
-      const compositeKey = compositeKeyFromKeyEvent(event)
+    .merge(
+      sources.dom.select('.shortcutCommand').events('focus')
+        .map(event => ({event, compositeKey: '', inProgress: true}))
+    )
+    .merge(
+      sources.dom.select('.shortcutCommand').events('blur')
+        .map(event => ({event, compositeKey: '', inProgress: false}))
+    )
+    .map(({event, compositeKey, inProgress}) => {
+      let key = compositeKey
+      inProgress = inProgress === undefined ? true : inProgress
+      let tmpKey = key
+      const command = event.target.dataset.command
+      const args = event.target.dataset.args
+
+      if (simpleKey(event) === 'escape') {
+        key = undefined
+      }
+      if (simpleKey(event) === 'enter') {
+        return {
+          key, command, args
+        }
+      }
       return {
-        key: compositeKey,
-        command: event.target.dataset.command,
-        args: event.target.dataset.args
+        key,
+        command,
+        args,
+
+        inProgress,
+        tmpKey
       }
     })
-    .loop((values, x) => {
+
+    /* .loop((values, x) => {
       console.log('looping', values, x)
+      // reset
       if (!Array.isArray(values)) {
         values = []
       }
       values.push(x)
+      const {command, args} = x
       if (x.key === 'enter') {
-        values = values.slice(0, -1)
-          .reduce((acc, cur) => {
-            return Object.assign({}, acc, {key: `${acc.key}+${cur.key}`})
-          })
+        if (values.length < 2) {
+          values = []
+          return {seed: values, value: values}
+        }
         return {seed: values, value: values}
       }
-      return {seed: values}
-    }, [])
+      if (x.key === 'escape') {
+        values = []
+        return {seed: values, value: values}
+      }
+      if (x.key === undefined) {
+        values = []
+        return {seed: values, value: {command, args, inProgress: true, keys: []}}
+      }
+
+      return {seed: values, value: {keys: values.map(x => x.key), command, args, inProgress: true}}
+    }, []) */
     .filter(x => x !== undefined)
 
   ])
@@ -94,9 +156,7 @@ const makeActions = (sources) => {
   .multicast()
 
   // sources.dom.select('.shortcutCommand').events('keydown')
-  //
   // setShortcut$.forEach(event => event.preventDefault)
-  setShortcut$.forEach(x => console.log('shortcutCommand', x))
 
   const changeTheme$ = most.mergeArray([
     sources.dom.select('#themeSwitcher').events('change')

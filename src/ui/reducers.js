@@ -19,13 +19,23 @@ const setShortcuts = (state, shortcuts) => {
 
 // set a specific shortcut
 const setShortcut = (state, shortcutData) => {
-  console.log('setShortcut', shortcutData)
   const shortcuts = state.shortcuts.map(shortcut => {
     const match = shortcut.command === shortcutData.command && shortcut.args === shortcutData.args
     if (!match) {
       return shortcut
     } else {
-      return Object.assign({}, shortcut, {key: shortcutData.key})
+      if ('inProgress' in shortcutData) {
+        if (shortcutData.inProgress) {
+          return Object.assign({}, shortcut, {inProgress: shortcutData.inProgress, tmpKey: shortcutData.tmpKey})
+        } else {
+          return Object.assign({}, shortcut, {inProgress: shortcutData.inProgress, tmpKey: shortcutData.tmpKey})
+        }
+      }
+      const { command, args } = shortcut
+      // const updatedShortcut = Object.assign({}, shortcut, {key: shortcut.tmpKey})
+      // const updatedShortcut = Object.assign({}, shortcut, {key: shortcutData.key})
+      const updatedShortcut = {key: shortcut.tmpKey, command, args}
+      return updatedShortcut
     }
   })
   return Object.assign({}, state, {shortcuts})

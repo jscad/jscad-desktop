@@ -3,7 +3,13 @@ const html = require('bel')
 module.exports = function shortcuts (state, i18n) {
   const keybindings = state.shortcuts// require('../../../data/keybindings.json')
   const bindingsList = keybindings.map((binding, index) => {
-    const {command, key, args} = binding
+    const {command, key, args, tmpKey} = binding
+
+    // if we are in the midst of assigning a keypress (inProgress) display 'type & hit enter'
+    // if we already have a temporary key use that one instead
+    const placeholder = (tmpKey && tmpKey.length > 0) ? tmpKey : i18n.translate('type & hit enter')  
+    const value = binding.inProgress ? '' : key
+
     return html`
     <tr>
         <td>${i18n.translate(command)}: ${i18n.translate(args)}</td>
@@ -12,7 +18,9 @@ module.exports = function shortcuts (state, i18n) {
             data-command=${command}
             data-args=${args}
             data-index=${index}
-            placeholder='${i18n.translate(key)}: type & hit enter'
+            
+            value='${value}'
+            placeholder='${placeholder}'
           />
         </td>
         <td>${i18n`always`}</td>
