@@ -52,7 +52,7 @@ function domSource () {
       }
       // eventsForListners[query] = eventName
       storedListeners[query + '@@' + eventName].events = eventName
-      return outputStream
+      return outputStream.multicast()
     }}
   }
 

@@ -19,23 +19,34 @@ const setShortcuts = (state, shortcuts) => {
 
 // set a specific shortcut
 const setShortcut = (state, shortcutData) => {
+  // console.log('setshortcut', shortcutData)
+  const alreadyExists = key => {
+    return state.shortcuts
+      .filter(shortcut => shortcut.key === key)
+      .length > 0
+  }
   const shortcuts = state.shortcuts.map(shortcut => {
     const match = shortcut.command === shortcutData.command && shortcut.args === shortcutData.args
     if (!match) {
       return shortcut
     } else {
       if ('inProgress' in shortcutData) {
-        if (shortcutData.inProgress) {
-          return Object.assign({}, shortcut, {inProgress: shortcutData.inProgress, tmpKey: shortcutData.tmpKey})
+        const {inProgress, tmpKey} = shortcutData
+        if (inProgress) {
+          const error = alreadyExists(tmpKey) ? 'shortcut already exists' : undefined
+          return Object.assign({}, shortcut, {inProgress, tmpKey: tmpKey, error})
         } else {
-          return Object.assign({}, shortcut, {inProgress: shortcutData.inProgress, tmpKey: shortcutData.tmpKey})
+          return Object.assign({}, shortcut, {inProgress, tmpKey: tmpKey})
         }
       }
-      const { command, args } = shortcut
-      // const updatedShortcut = Object.assign({}, shortcut, {key: shortcut.tmpKey})
-      // const updatedShortcut = Object.assign({}, shortcut, {key: shortcutData.key})
-      const updatedShortcut = {key: shortcut.tmpKey, command, args}
-      return updatedShortcut
+      if (shortcutData.done && !alreadyExists(shortcutData.key)) {
+        console.log('setshortcut', shortcutData)
+        const { command, args } = shortcut
+        // const updatedShortcut = Object.assign({}, shortcut, {key: shortcutData.key})
+        const updatedShortcut = {key: shortcutData.key, command, args}
+        return updatedShortcut
+      }
+      return shortcut
     }
   })
   return Object.assign({}, state, {shortcuts})
