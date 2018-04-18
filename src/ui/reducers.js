@@ -19,7 +19,6 @@ const setShortcuts = (state, shortcuts) => {
 
 // set a specific shortcut
 const setShortcut = (state, shortcutData) => {
-  // console.log('setshortcut', shortcutData)
   const alreadyExists = key => {
     return state.shortcuts
       .filter(shortcut => shortcut.key === key)
@@ -40,9 +39,7 @@ const setShortcut = (state, shortcutData) => {
         }
       }
       if (shortcutData.done && !alreadyExists(shortcutData.key)) {
-        console.log('setshortcut', shortcutData)
         const { command, args } = shortcut
-        // const updatedShortcut = Object.assign({}, shortcut, {key: shortcutData.key})
         const updatedShortcut = {key: shortcutData.key, command, args}
         return updatedShortcut
       }
