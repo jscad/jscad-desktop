@@ -1,4 +1,4 @@
-# jscad-desktop
+# jscad-desktop: THIS REPOSITORY IS DEPRECRATED ! jscad-desktop HAS moved to https://github.com/jscad/OpenJSCAD.org/tree/master/packages/desktop
 
 [![GitHub version](https://badge.fury.io/gh/jscad%2Fdesktop.svg)](https://badge.fury.io/gh/jscad%2Fdesktop)
 [![Build Status](https://travis-ci.org/jscad/desktop.svg)](https://travis-ci.org/jscad/desktop)
